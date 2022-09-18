@@ -25,3 +25,7 @@ You can confirm you’re in the virtual environment by checking the location of 
 As long as your virtual environment is activated `pip` will install packages into that specific environment, and you’ll be able
 to import and use packages in your Python application.
 
+Installing dependencies from requirements.txt
+    
+    python3 -m pip install -r requirements.txt
+
