@@ -8,7 +8,7 @@ First start the server
 
 Then upload a file
 
-    python3 client/upload.py --verbose --src donald.jpeg
+    python3 client/upload.py --verbose --src client/donald.jpeg
 
 Then check new file in ./client
 
