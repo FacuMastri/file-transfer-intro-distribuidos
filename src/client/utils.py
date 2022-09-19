@@ -1,4 +1,6 @@
-def construct_packet(packet_number: int, filename: str, total_packets: int, payload):
+def construct_packet(
+    packet_number: int, filename: str, total_packets: int, payload: bytes
+):
     """
     Estructura del paquete
     4 bytes para el numero de paquete
@@ -15,7 +17,7 @@ def construct_packet(packet_number: int, filename: str, total_packets: int, payl
         + total_packets
         + filename_length
         + bytes(filename, "utf-8")
-        + bytes(payload)
+        + payload
     )
 
     return packet
