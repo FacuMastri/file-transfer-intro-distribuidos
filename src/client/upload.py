@@ -69,11 +69,11 @@ with open(filepath, "rb") as f:
 
         client_socket.sendto(packet, svr_addr)
         total_bytes += len(packet)
+        # Aca habria que recibir el ACK
 
         data = f.read(BUFFER)
 
-    logging.info("Upload complete!")
-
-    logging.info(f"Total bytes sended {total_bytes}")
-    logging.info(f"Total file bytes sended {file_bytes}")
-    logging.info(f"Total packets sended {packets_sended}")
+logging.info("Upload complete!")
+logging.info(f"Total bytes sended {total_bytes}")
+logging.info(f"Total file bytes sended {file_bytes}")
+logging.info(f"Total packets sended {packets_sended}")
