@@ -49,7 +49,7 @@ data, client_address = server_socket.recvfrom(BUFFER)
 name = data[0:11]
 logging.debug(f"Filename received: {name.decode()}")
 
-file = open(f"src/server/{name.decode()}", "wb")
+file = open(f"src/server/files/{name.decode()}", "wb")
 
 total_bytes_written = 0
 total_bytes_received = 0
