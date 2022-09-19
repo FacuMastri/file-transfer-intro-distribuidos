@@ -1,10 +1,11 @@
 import argparse
 import logging
 from socket import AF_INET, SOCK_DGRAM, socket
+from utils import decode_packet
 
 DEFAULT_DEBUG_LEVEL = logging.INFO
 DEFAULT_SERVER_PORT = 12000
-BUFFER = 1024
+BUFFER = 2048
 
 parser = argparse.ArgumentParser()
 
@@ -47,19 +48,13 @@ logging.info(f"FTP server up in port {SERVER_PORT}")
 while True:
     server_socket.settimeout(100000)
     data, client_address = server_socket.recvfrom(BUFFER)
-    name = data[0:11]
-    logging.debug(f"Filename received: {name.decode()}")
-
-    file = open(f"src/server/files/{name.decode()}", "wb")
+    packet_number, total_packets, filename, payload = decode_packet(data)
+    logging.debug(f"Filename received: {filename}")
+    file = open(f"src/server/files/{filename}", "wb")
 
     total_bytes_written = 0
     total_bytes_received = 0
     total_packets = 0
-
-    def process_packet(data, header_bytes):
-        header = data[0:header_bytes]
-        data = data[header_bytes:]
-        return header, data
 
     try:
         while data:
@@ -70,18 +65,15 @@ while True:
             )
             logging.debug(f"First 20 bytes received: {list(data[0:20])}")
 
-            # Aqui puedo extraer los datos del archivo del paquete recibido
-            header, data = process_packet(
-                data, 11
-            )  # Aca extraigo headers y cosas asi que vayamos definiendo
-            file.write(data)
-            total_bytes_written += len(data)
+            file.write(payload)
+            total_bytes_written += len(payload)
 
-            logging.debug(f"Writting data to {file.name}: {len(data)} bytes")
-            logging.debug(f"First 20 bytes written: {list(data[0:20])}")
+            logging.debug(f"Writting data to {file.name}: {len(payload)} bytes")
+            logging.debug(f"First 20 bytes written: {list(payload[0:20])}")
 
             server_socket.settimeout(2)
             data, client_address = server_socket.recvfrom(BUFFER)
+            packet_number, total_packets, filename, payload = decode_packet(data)
 
     except:
         file.close()
@@ -89,5 +81,3 @@ while True:
         logging.info(f"Total bytes received: {total_bytes_received}")
         logging.info(f"Total bytes written in disk: {total_bytes_written}")
         logging.info(f"Total packets received: {total_packets}")
-
-server_socket.close()

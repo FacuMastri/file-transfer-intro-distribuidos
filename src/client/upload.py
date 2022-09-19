@@ -1,6 +1,7 @@
 import argparse
 import logging
 from socket import AF_INET, SOCK_DGRAM, socket
+from utils import construct_packet
 
 DEFAULT_SERVER = "localhost"
 DEFAULT_SERVER_PORT = 12000
@@ -48,30 +49,28 @@ file_bytes = 0
 total_bytes = 0
 packets_sended = 0
 
-HEADER_LENGHT = len(args.name)
+name = args.name
+filepath = args.src
+total_packets = (
+    100  # Hardcodeado, como lo calculo? Tengo que abrir el archivo dos veces?
+)
 
+logging.info(f"Uploading {filepath} to FTP server with name {name}")
 
-def add_headers(payload):
-    name = args.name
-    packet_data = bytes(name, "utf-8") + payload
-    return packet_data
-
-
-logging.info(f"Uploading {args.src} to FTP server")
-
-with open(args.src, "rb") as f:
-    data = f.read(BUFFER - HEADER_LENGHT)
+with open(filepath, "rb") as f:
+    data = f.read(BUFFER)
     while data:
         file_bytes += len(data)
-        total_bytes += len(data) + HEADER_LENGHT
         packets_sended += 1
+        packet = construct_packet(packets_sended, name, total_packets, data)
 
-        packet_data = add_headers(data)
-        logging.debug(f"Sending {len(packet_data)} bytes to {SERVER}:{SERVER_PORT}")
-        logging.debug(f"First 20 bytes sended: {list(packet_data[0:20])}")
-        client_socket.sendto(packet_data, svr_addr)
+        logging.debug(f"Sending {len(packet)} bytes to {SERVER}:{SERVER_PORT}")
+        logging.debug(f"First 20 bytes sended: {list(packet[0:20])}")
 
-        data = f.read(BUFFER - HEADER_LENGHT)
+        client_socket.sendto(packet, svr_addr)
+        total_bytes += len(packet)
+
+        data = f.read(BUFFER)
 
     logging.info("Upload complete!")
 
