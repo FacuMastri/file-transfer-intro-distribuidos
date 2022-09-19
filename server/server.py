@@ -62,7 +62,7 @@ try:
         total_bytes_received += len(data)
         total_packets += 1
         logging.debug(f"Data received from client {client_address[0]}:{client_address[1]}: {len(data)} bytes")
-        logging.debug(f"First 20 bytes received: {data[0:20]}")
+        logging.debug(f"First 20 bytes received: {list(data[0:20])}")
         
         # Aqui puedo extraer los datos del archivo del paquete recibido
         header, data = process_packet(data, 11) # Aca extraigo headers y cosas asi que vayamos definiendo
@@ -70,7 +70,7 @@ try:
         total_bytes_written += len(data)
 
         logging.debug(f"Writting data to {file.name}: {len(data)} bytes")
-        logging.debug(f"First 20 bytes written: {data[0:20]}")
+        logging.debug(f"First 20 bytes written: {list(data[0:20])}")
         
         server_socket.settimeout(2)
         data, client_address = server_socket.recvfrom(BUFFER)

@@ -62,6 +62,7 @@ with open(args.src, "rb") as f:
         
         packet_data = add_headers(data)
         logging.debug(f"Sending {len(packet_data)} bytes to {SERVER}:{SERVER_PORT}")
+        logging.debug(f"First 20 bytes sended: {list(packet_data[0:20])}")
         client_socket.sendto(packet_data, svr_addr)
         
         data = f.read(BUFFER - HEADER_LENGHT)
