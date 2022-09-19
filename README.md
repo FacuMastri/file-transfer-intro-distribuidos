@@ -1,12 +1,16 @@
 # FileTransfer-grupo7
 
-To run server
+## Test the file upload
 
-    python3 server/server.py
+First start the server
 
-To run client 
+    python3 server/server.py --verbose
 
-    python3 client/client.py
+Then upload a file
+
+    python3 client/upload.py --verbose --src donald.jpeg
+
+Then check new file in ./client
 
 ## Dependencies
 
