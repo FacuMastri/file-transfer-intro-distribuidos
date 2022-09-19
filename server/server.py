@@ -43,7 +43,7 @@ except Exception as e:
 logging.info(f'FTP server up in port {SERVER_PORT}')
 
 data, client_address = server_socket.recvfrom(BUFFER)
-f = open("donald.jpeg",'wb')
+f = open("server/donald.jpeg",'wb')
 
 try:
     while(data):
