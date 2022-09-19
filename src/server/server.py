@@ -56,12 +56,10 @@ while True:
     total_bytes_received = 0
     total_packets = 0
 
-
     def process_packet(data, header_bytes):
         header = data[0:header_bytes]
         data = data[header_bytes:]
         return header, data
-
 
     try:
         while data:
