@@ -43,15 +43,42 @@ except Exception as e:
 logging.info(f'FTP server up in port {SERVER_PORT}')
 
 data, client_address = server_socket.recvfrom(BUFFER)
-f = open("server/donald.jpeg",'wb')
+name = data[0:11]
+logging.debug(f"Filename received: {name.decode()}")
+
+file = open(f"server/{name.decode()}",'wb')
+
+total_bytes_written = 0
+total_bytes_received = 0
+total_packets = 0
+
+def process_packet(data, header_bytes):
+    header = data[0:header_bytes]
+    data = data[header_bytes:]
+    return header, data
 
 try:
     while(data):
-        logging.debug(f"Data received from client {client_address[0]}:{client_address[1]}")
-        f.write(data)
+        total_bytes_received += len(data)
+        total_packets += 1
+        logging.debug(f"Data received from client {client_address[0]}:{client_address[1]}: {len(data)} bytes")
+        logging.debug(f"First 20 bytes received: {data[0:20]}")
+        
+        # Aqui puedo extraer los datos del archivo del paquete recibido
+        header, data = process_packet(data, 11) # Aca extraigo headers y cosas asi que vayamos definiendo
+        file.write(data)
+        total_bytes_written += len(data)
+
+        logging.debug(f"Writting data to {file.name}: {len(data)} bytes")
+        logging.debug(f"First 20 bytes written: {data[0:20]}")
+        
         server_socket.settimeout(2)
         data, client_address = server_socket.recvfrom(BUFFER)
+        
 except:
-    f.close()
+    file.close()
     server_socket.close()
     logging.info("File downloaded!")
+    logging.info(f"Total bytes received: {total_bytes_received}")
+    logging.info(f"Total bytes written in disk: {total_bytes_written}")
+    logging.info(f"Total packets received: {total_packets}")

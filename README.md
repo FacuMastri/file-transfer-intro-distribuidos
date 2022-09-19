@@ -4,11 +4,11 @@
 
 First start the server
 
-    python3 server/server.py --verbose
+    python3 server/server.py
 
 Open a new terminal and upload a file
 
-    python3 client/upload.py --verbose --src client/donald.jpeg
+    python3 client/upload.py -v --src client/donald.jpeg --name donald.jpeg
 
 Then check new file in server/donald.jpeg
 
