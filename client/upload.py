@@ -74,6 +74,7 @@ with open(args.src, "rb") as f:
         data = f.read(BUFFER - HEADER_LENGHT)
 
     logging.info("Upload complete!")
+
     logging.info(f"Total bytes sended {total_bytes}")
     logging.info(f"Total file bytes sended {file_bytes}")
     logging.info(f"Total packets sended {packets_sended}")
