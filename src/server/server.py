@@ -33,7 +33,13 @@ else:
 
 SERVER_PORT = DEFAULT_SERVER_PORT if args.port is None else int(args.port)
 
-logging.basicConfig(format="[%(levelname)s] %(message)s", level=DEBUG_LEVEL)
+color_server = "\033[0;33m"
+end_color_server = "\033[0m"
+logging.basicConfig(
+    format=f"[%(asctime)s] - [{color_server}server{end_color_server} %(levelname)s] - %(message)s",
+    level=DEBUG_LEVEL,
+    datefmt="%Y/%m/%d %H:%M:%S",
+)
 logging.debug(f"Setting {logging.getLevelName(DEBUG_LEVEL)} log level")
 
 server_socket = socket(AF_INET, SOCK_DGRAM)

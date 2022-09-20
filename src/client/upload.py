@@ -36,7 +36,13 @@ else:
 SERVER = DEFAULT_SERVER if args.host is None else args.host
 SERVER_PORT = DEFAULT_SERVER_PORT if args.port is None else args.port
 
-logging.basicConfig(format="[%(levelname)s] %(message)s", level=DEBUG_LEVEL)
+color_upload_client = "\033[0;32m"
+end_color_client = "\033[0m"
+logging.basicConfig(
+    format=f"[%(asctime)s] - [{color_upload_client}upload{end_color_client} %(levelname)s] - %(message)s",
+    level=DEBUG_LEVEL,
+    datefmt="%Y/%m/%d %H:%M:%S",
+)
 logging.debug(f"Setting {logging.getLevelName(DEBUG_LEVEL)} log level")
 
 client_socket = socket(AF_INET, SOCK_DGRAM)
