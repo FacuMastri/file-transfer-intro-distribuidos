@@ -4,7 +4,7 @@
 
 First start the server
 
-    python3 src/server/server.py
+    python3 src/start_server.py
 
 Open a new terminal and upload a file
 
