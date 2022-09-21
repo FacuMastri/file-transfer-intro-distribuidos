@@ -75,7 +75,14 @@ with open(filepath, "rb") as f:
 
         client_socket.sendto(packet.to_bytes(), svr_addr)
 
-        data, client_address = client_socket.recvfrom(BUFFER)
+        client_socket.settimeout(2)
+        try:
+            data, client_address = client_socket.recvfrom(BUFFER)
+        except:
+            # Recibi timeout
+            logging.error("Timeout event ocurr")
+            exit()
+
         packet_rcv = Packet.from_bytes(data)
 
         # Revisar si llegan paquetes con timeout cumplido
