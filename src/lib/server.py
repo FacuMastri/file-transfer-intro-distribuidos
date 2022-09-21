@@ -47,7 +47,7 @@ class Server:
                     self.logger.debug(
                         f"Sending ACK from paquet number {ack_packet.packet_number}"
                     )
-                    # server_socket.sendto(ack_packet.to_bytes(), client_address)
+                    server_socket.sendto(ack_packet.to_bytes(), client_address)
                     total_bytes_written += len(packet.payload)
 
                     self.logger.debug(
