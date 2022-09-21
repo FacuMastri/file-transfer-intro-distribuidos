@@ -1,45 +1,43 @@
-from src.client.utils import construct_packet
-from src.server.utils import decode_packet
+from src.lib.packet import Packet
 
 
-def test_construct_packet():
+def test_packet():
     payload = bytes("esto es una prueba", "utf-8")
-    packet = construct_packet(257, "prueba.txt", 50, payload)
+    packet = Packet(12, "prueba.txt", 1, 0, 0, 0, 0, 1, payload)
+
+    p_bytes = packet.to_bytes()
     # Se puede imprimir
-    print(packet)
+    print(p_bytes)
     # Vemos el tipo
-    print("Tipo de dato: " + str(type(packet)))
+    print("Tipo de dato: " + str(type(p_bytes)))
     # A mi me gusta ver los bytes en decimal
-    print(list(packet))
+    print(list(p_bytes))
 
-    assert packet[0] == 0
-    assert packet[1] == 0
-    assert packet[2] == 1
-    assert packet[3] == 1
+    # 4 bytes para sequence number
+    assert p_bytes[0] == 0
+    assert p_bytes[1] == 0
+    assert p_bytes[2] == 0
+    assert p_bytes[3] == 12
 
-    assert packet[4] == 0
-    assert packet[5] == 0
-    assert packet[6] == 0
-    assert packet[7] == 50
+    # Byte 6 para el largo del filename
+    assert p_bytes[5] == 10
 
-    assert packet[8] == 0
-    assert packet[9] == 0
-    assert packet[10] == 0
-    assert packet[11] == 10
+    packet = Packet.from_bytes(p_bytes)
+
+    assert packet.filename == "prueba.txt"
+    assert packet.payload == bytes("esto es una prueba", "utf-8")
 
 
-def test_decode_packet():
-    payload = bytes("estoy probando", "utf-8")
-    packet = construct_packet(12, "una_prueba.txt", 2, payload)
+def test_packet_no_name():
+    payload = bytes("esto es una prueba", "utf-8")
+    try:
+        Packet(12, "", 1, 0, 0, 0, 0, 1, payload)
+    except:
+        assert True
 
-    packet_number, total_packets, filename, payload = decode_packet(packet)
 
-    print(f"Packet number: {packet_number}")
-    print(f"Total packets: {total_packets}")
-    print(f"Filename: {filename}")
-    print(f"Payload: {payload.decode('utf-8')}")
+def test_packet_size():
+    payload = bytes("esto es una prueba", "utf-8")
+    packet = Packet(12, "donald.jpeg", 1, 0, 0, 0, 0, 1, payload)
 
-    assert packet_number == 12
-    assert total_packets == 2
-    assert filename == "una_prueba.txt"
-    assert payload.decode("utf-8") == "estoy probando"
+    assert packet.size() == 35

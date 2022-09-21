@@ -1,8 +1,7 @@
 from socket import AF_INET, SOCK_DGRAM, socket
+from lib.packet import Packet
 
-from server.utils import decode_packet
-
-BUFFER = 2048
+BUFFER = 4096
 
 
 class Server:
@@ -24,9 +23,9 @@ class Server:
             server_socket.settimeout(100000)
             data, client_address = server_socket.recvfrom(BUFFER)
             self.logger.info(f"Received data from {client_address}")
-            packet_number, total_packets, filename, payload = decode_packet(data)
-            self.logger.debug(f"Filename received: {filename}")
-            file = open(f"src/server/files/{filename}", "wb")
+            packet = Packet.from_bytes(data)
+            self.logger.debug(f"Filename received: {packet.filename}")
+            file = open(f"src/files/{packet.filename}", "wb")
 
             total_bytes_written = 0
             total_bytes_received = 0
@@ -41,19 +40,26 @@ class Server:
                     )
                     self.logger.debug(f"First 20 bytes received: {list(data[0:20])}")
 
-                    file.write(payload)
-                    total_bytes_written += len(payload)
+                    ack_packet = Packet(
+                        total_packets, "asd.txt", 0, 0, 1, 0, 0, 0, bytes("", "utf-8")
+                    )
+                    file.write(packet.payload)
+                    self.logger.debug(
+                        f"Sending ACK from paquet number {ack_packet.packet_number}"
+                    )
+                    server_socket.sendto(ack_packet.to_bytes(), client_address)
+                    total_bytes_written += len(packet.payload)
 
                     self.logger.debug(
-                        f"Writting data to {file.name}: {len(payload)} bytes"
+                        f"Writting data to {file.name}: {len(packet.payload)} bytes"
                     )
-                    self.logger.debug(f"First 20 bytes written: {list(payload[0:20])}")
+                    self.logger.debug(
+                        f"First 20 bytes written: {list(packet.payload[0:20])}"
+                    )
 
                     server_socket.settimeout(2)
                     data, client_address = server_socket.recvfrom(BUFFER)
-                    packet_number, total_packets, filename, payload = decode_packet(
-                        data
-                    )
+                    packet = Packet.from_bytes(data)
 
             except:
                 file.close()

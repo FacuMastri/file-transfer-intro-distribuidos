@@ -1,7 +1,7 @@
 import argparse
 import logging
 from socket import AF_INET, SOCK_DGRAM, socket
-from utils import construct_packet
+from lib.packet import Packet
 
 DEFAULT_SERVER = "localhost"
 DEFAULT_SERVER_PORT = 12000
@@ -68,16 +68,26 @@ with open(filepath, "rb") as f:
     while data:
         file_bytes += len(data)
         packets_sended += 1
-        packet = construct_packet(packets_sended, name, total_packets, data)
+        packet = Packet(packets_sended, name, 1, 0, 0, 0, 0, 0, data)
 
-        logging.debug(f"Sending {len(packet)} bytes to {SERVER}:{SERVER_PORT}")
-        logging.debug(f"First 20 bytes sended: {list(packet[0:20])}")
+        logging.debug(f"Sending {packet.size()} bytes to {SERVER}:{SERVER_PORT}")
+        logging.debug(f"First 20 bytes sended: {list(packet.payload[0:20])}")
 
-        client_socket.sendto(packet, svr_addr)
-        total_bytes += len(packet)
+        client_socket.sendto(packet.to_bytes(), svr_addr)
+
+        data, client_address = client_socket.recvfrom(BUFFER)
+        packet_rcv = Packet.from_bytes(data)
+
+        # Revisar si llegan paquetes con timeout cumplido
+        if packet_rcv.ack:
+            logging.debug(f"Paquet number {packet_rcv.packet_number} ACK received")
+
+        total_bytes += packet.size()
         # Aca habria que recibir el ACK
 
         data = f.read(BUFFER)
+        # Aca se tiene que dar cuenta
+
 
 logging.info("Upload complete!")
 logging.info(f"Total bytes sended {total_bytes}")

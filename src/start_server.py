@@ -1,7 +1,7 @@
 import logging
 
-from server.parser import parse_server_args
-from server.server import Server
+from lib.parser import parse_server_args
+from lib.server import Server
 
 if __name__ == "__main__":
     server_port, debug_level = parse_server_args()
