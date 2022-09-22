@@ -108,5 +108,7 @@ class Packet:
     def size(self) -> int:
         return len(self.payload) + len(self.filename) + 6
 
-    def send_to_socket(self, socket, address):
-        pass
+    def __str__(self):
+        return "packet_number: {}, ack: {}, len(payload): {}".format(
+            self.packet_number, self.ack, len(self.payload)
+        )

@@ -1,8 +1,8 @@
 import logging
 import os
 from socket import AF_INET, SOCK_DGRAM, socket
-from lib.packet import Packet
 from lib.parser import parse_upload_args
+from lib.stop_and_wait_manager import StopAndWaitManager
 
 BUFFER = 1024
 # Green
@@ -16,47 +16,31 @@ def upload_file(socket, filename, filepath, logger):
         return
 
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
-    packets_sent = 0
-    file_bytes = 0
+    total_packets_sent = 0
+    total_file_bytes = 0
     total_bytes = 0
+    stop_and_wait_manager = StopAndWaitManager(socket, svr_addr, logger)
 
     # Send data to server through socket
     with open(filepath, "rb") as file:
         data = file.read(BUFFER)
         while data:
-            file_bytes += len(data)
-            packets_sent += 1
-            packet = Packet(packets_sent, filename, 1, 0, 0, 0, 0, 0, data)
+            total_file_bytes += len(data)
+            total_packets_sent += 1
+            packet_sent = stop_and_wait_manager.send_data(
+                data, filename, total_packets_sent
+            )
+            # No se usa?
+            packet_received = stop_and_wait_manager.receive_packet(BUFFER)
 
-            logger.debug(f"Sending {packet.size()} bytes to {svr_addr}")
-            logger.debug(f"First 20 bytes sended: {list(packet.payload[0:20])}")
-
-            socket.sendto(packet.to_bytes(), svr_addr)
-
-            # client_socket.settimeout(2)
-            try:
-                data, client_address = socket.recvfrom(BUFFER)
-            except:
-                # Recibi timeout
-                logging.error("Timeout event ocurr")
-                exit()
-
-            packet_rcv = Packet.from_bytes(data)
-
-            # Revisar si llegan paquetes con timeout cumplido
-            if packet_rcv.ack:
-                logger.debug(f"Paquet number {packet_rcv.packet_number} ACK received")
-
-            total_bytes += packet.size()
-            # Aca habria que recibir el ACK
+            total_bytes += packet_sent.size()
 
             data = file.read(BUFFER)
-            # Aca se tiene que dar cuenta
 
         logger.info("Upload complete!")
-        logger.info(f"Total bytes sended {total_bytes}")
-        logger.info(f"Total file bytes sended {file_bytes}")
-        logger.info(f"Total packets sended {packets_sent}")
+        logger.info(f"Total bytes sent {total_bytes}")
+        logger.info(f"Total file bytes sent {total_file_bytes}")
+        logger.info(f"Total packets sent {total_packets_sent}")
 
 
 if __name__ == "__main__":
