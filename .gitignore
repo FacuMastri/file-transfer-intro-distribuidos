@@ -1,8 +1,16 @@
+# IDEs
 .idea
-.env/
 .vscode
+
+# Virtual environments
+.env/
 venv/
 
+# Caches
 **/**/__pycache__/
 **/__pycache__/
 **/.pytest_cache/
+
+# Bucket files
+server/files/*
+src/server/files
