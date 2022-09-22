@@ -3,13 +3,15 @@ import logging
 from lib.parser import parse_server_args
 from lib.server import Server
 
+# Orange
+COLOR_SERVER = "\033[0;33m"
+END_COLOR = "\033[0m"
+
 if __name__ == "__main__":
     server_port, debug_level = parse_server_args()
 
-    color_server = "\033[0;33m"
-    end_color_server = "\033[0m"
     logging.basicConfig(
-        format=f"[%(asctime)s] - [{color_server}server{end_color_server} %(levelname)s] - %(message)s",
+        format=f"[%(asctime)s] - [{COLOR_SERVER}server{END_COLOR} %(levelname)s] - %(message)s",
         level=debug_level,
         datefmt="%Y/%m/%d %H:%M:%S",
     )

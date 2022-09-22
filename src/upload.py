@@ -3,17 +3,16 @@ from socket import AF_INET, SOCK_DGRAM, socket
 from lib.packet import Packet
 from lib.parser import parse_upload_args
 
-DEFAULT_SERVER = "localhost"
-DEFAULT_SERVER_PORT = 12000
-DEFAULT_DEBUG_LEVEL = logging.INFO
 BUFFER = 1024
+# Green
+COLOR_UPLOAD = "\033[0;32m"
+END_COLOR = "\033[0m"
 
 if __name__ == "__main__":
     args = parse_upload_args()
-    color_upload_client = "\033[0;32m"
-    end_color_client = "\033[0m"
+
     logging.basicConfig(
-        format=f"[%(asctime)s] - [{color_upload_client}upload{end_color_client} %(levelname)s] - %(message)s",
+        format=f"[%(asctime)s] - [{COLOR_UPLOAD}upload{END_COLOR} %(levelname)s] - %(message)s",
         level=args.debug_level,
         datefmt="%Y/%m/%d %H:%M:%S",
     )
@@ -27,7 +26,7 @@ if __name__ == "__main__":
 
     file_bytes = 0
     total_bytes = 0
-    packets_sended = 0
+    packets_sent = 0
 
     name = args.name
     filepath = args.src
@@ -41,15 +40,15 @@ if __name__ == "__main__":
         data = f.read(BUFFER)
         while data:
             file_bytes += len(data)
-            packets_sended += 1
-            packet = Packet(packets_sended, name, 1, 0, 0, 0, 0, 0, data)
+            packets_sent += 1
+            packet = Packet(packets_sent, name, 1, 0, 0, 0, 0, 0, data)
 
             logging.debug(f"Sending {packet.size()} bytes to {svr_addr}")
             logging.debug(f"First 20 bytes sended: {list(packet.payload[0:20])}")
 
             client_socket.sendto(packet.to_bytes(), svr_addr)
 
-            client_socket.settimeout(2)
+            # client_socket.settimeout(2)
             try:
                 data, client_address = client_socket.recvfrom(BUFFER)
             except:
@@ -72,4 +71,4 @@ if __name__ == "__main__":
     logging.info("Upload complete!")
     logging.info(f"Total bytes sended {total_bytes}")
     logging.info(f"Total file bytes sended {file_bytes}")
-    logging.info(f"Total packets sended {packets_sended}")
+    logging.info(f"Total packets sended {packets_sent}")
