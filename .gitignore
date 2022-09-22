@@ -12,5 +12,4 @@ venv/
 **/.pytest_cache/
 
 # Bucket files
-server/files/*
 src/server/files
