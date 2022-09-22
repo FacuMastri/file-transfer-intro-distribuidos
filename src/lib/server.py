@@ -25,7 +25,7 @@ class Server:
             self.logger.info(f"Received data from {client_address}")
             packet = Packet.from_bytes(data)
             self.logger.debug(f"Filename received: {packet.filename}")
-            file = open(f"src/files/{packet.filename}", "wb")
+            file = open(f"src/server/files/{packet.filename}", "wb")
 
             total_bytes_written = 0
             total_bytes_received = 0
