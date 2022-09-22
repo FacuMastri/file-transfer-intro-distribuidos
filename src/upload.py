@@ -8,7 +8,7 @@ DEFAULT_SERVER_PORT = 12000
 DEFAULT_DEBUG_LEVEL = logging.INFO
 BUFFER = 1024
 
-parser = argparse.ArgumentParser(description="FTP server - flags for upload command")
+parser = argparse.ArgumentParser(description="FTP client - flags for upload command")
 
 parser.add_argument(
     "-v", "--verbose", action="store_true", help="increase output verbosity"

@@ -5,7 +5,7 @@ DEFAULT_SERVER_PORT = 12000
 
 
 def parse_server_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="FTP server - flags for server command")
 
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="increase output verbosity"
@@ -13,9 +13,9 @@ def parse_server_args():
     parser.add_argument(
         "-q", "--quiet", action="store_true", help="decrease output verbosity"
     )
-    parser.add_argument("-H", "--host", metavar="host", help="service ip address")
+    parser.add_argument("-H", "--host", metavar="addr", help="service ip address")
     parser.add_argument("-p", "--port", metavar="port", help="service port")
-    parser.add_argument("-s", "--storage", metavar="path", help="storage dir path")
+    parser.add_argument("-s", "--storage", metavar="dirpath", help="storage dir path")
 
     args = parser.parse_args()
 
