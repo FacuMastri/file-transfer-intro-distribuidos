@@ -31,7 +31,7 @@ def upload_file(socket, filename, filepath, logger):
                 data, filename, total_packets_sent
             )
             # No se usa?
-            packet_received = stop_and_wait_manager.receive_packet(BUFFER)
+            _packet_received = stop_and_wait_manager.receive_packet(BUFFER)
 
             total_bytes += packet_sent.size()
 

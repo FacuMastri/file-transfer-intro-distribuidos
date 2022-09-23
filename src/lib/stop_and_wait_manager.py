@@ -10,6 +10,13 @@ class StopAndWaitManager:
         self.logger = logger
 
     def send_data(self, data, filename, packet_number):
+        packet_to_be_sent = self._send_packet(data, filename, packet_number)
+        # Lo devuelvo solo para cumplir con la interfaz de quien llama a este metodo (o sea para poder contar los bytes
+        # enviados en modo debug)
+        return packet_to_be_sent
+
+    def _send_packet(self, data, filename, packet_number):
+        # Hardcodeado por ahora los flags/headers de nuestro paquete
         packet_to_be_sent = Packet(packet_number, filename, 1, 0, 0, 0, 0, 0, data)
         self.logger.debug(
             f"Sending {packet_to_be_sent.size()} bytes to {self.server_address}"
@@ -18,8 +25,6 @@ class StopAndWaitManager:
             f"First 20 bytes sent: {list(packet_to_be_sent.payload[0:20])}"
         )
         self.socket.sendto(packet_to_be_sent.to_bytes(), self.server_address)
-        # Lo devuelvo solo para cumplir con la interfaz de quien llama a este metodo (o sea para poder contar los bytes
-        # enviados en modo debug)
         return packet_to_be_sent
 
     def receive_packet(self, socket_buffer_size):
