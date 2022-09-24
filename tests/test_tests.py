@@ -3,7 +3,7 @@ from src.lib.packet import Packet
 
 def test_packet():
     payload = bytes("esto es una prueba", "utf-8")
-    packet = Packet(12, "prueba.txt", 1, 0, 0, 0, 0, 1, payload)
+    packet = Packet(12, 1, 0, 0, 0, 0, 1, "prueba.txt", payload)
 
     p_bytes = packet.to_bytes()
     # Se puede imprimir
@@ -31,13 +31,13 @@ def test_packet():
 def test_packet_no_name():
     payload = bytes("esto es una prueba", "utf-8")
     try:
-        Packet(12, "", 1, 0, 0, 0, 0, 1, payload)
+        Packet(12, 1, 0, 0, 0, 0, 1, "", payload)
     except:
         assert True
 
 
 def test_packet_size():
     payload = bytes("esto es una prueba", "utf-8")
-    packet = Packet(12, "donald.jpeg", 1, 0, 0, 0, 0, 1, payload)
+    packet = Packet(12,  1, 0, 0, 0, 0, 1, "donald.jpeg", payload)
 
     assert packet.size() == 35

@@ -1,5 +1,6 @@
 class Packet:
     """
+    Header size = 6 bytes
     Estructura del paquete
     4 bytes para el numero de paquete
     1 bit si es upload o download
@@ -15,31 +16,30 @@ class Packet:
     1 bytes para el largo del filename
     El resto para el payload
     """
+    HEADERSIZE = 6
+
+    # ACKPACKAGE = ]
 
     def __init__(
         self,
         packet_number: int,
-        filename: str,
         is_upload: bool,
         finished: bool,
         ack: bool,
         syn: bool,
         status_code: int,
         version: int,
+        filename: str,
         payload: bytes,
     ):
         self.packet_number = packet_number
-
-        if filename == "":
-            raise Exception
-
-        self.filename = filename
         self.is_upload = is_upload
         self.finished = finished
         self.ack = ack
         self.syn = syn
         self.status_code = status_code
         self.version = version
+        self.filename = filename
         self.payload = payload
 
     def to_bytes(self) -> bytes:
@@ -58,13 +58,20 @@ class Packet:
         if self.version == 1:
             flags |= 0b0000_0001
 
-        packet = (
+        packet = ( 
             self.packet_number.to_bytes(4, "big")
             + flags.to_bytes(1, "big")
             + len(self.filename).to_bytes(1, "big")
             + bytes(self.filename, "utf-8")
             + self.payload
         )
+        return packet
+
+
+    @staticmethod
+    def ack_packet():
+        # TODO agregar el numero de paquete para validar lo de la perdiad de acks en vuelo
+        packet = bytes([0, 0, 0, 0, 32, 0]) 
         return packet
 
     @staticmethod
@@ -95,13 +102,13 @@ class Packet:
 
         return Packet(
             packet_number,
-            filename,
             is_upload,
             finished,
             ack,
             syn,
             status_code,
             version,
+            filename,
             payload,
         )
 

@@ -14,33 +14,29 @@ def upload_file(socket, filename, filepath, logger):
     if not os.path.isfile(filepath):
         logger.error(f"File {filepath} does not exist")
         return
-
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
-    total_packets_sent = 0
-    total_file_bytes = 0
-    total_bytes = 0
+
     stop_and_wait_manager = StopAndWaitManager(socket, svr_addr, logger)
 
-    # Send data to server through socket
+    filesize = os.stat(filepath)
+    logger.info(f"filesize {filesize.st_size}")
+    stop_and_wait_manager.start_connection(filename, filesize)
+    logger.info("connection established")
+
+
     with open(filepath, "rb") as file:
+        logger.info("file opened")
         data = file.read(BUFFER)
+        # TODO hay que contar los paquetes que mandamos porque podemos perder un ack del server y el server guardaria 2 veces el mismo paquete
         while data:
-            total_file_bytes += len(data)
-            total_packets_sent += 1
-            packet_sent = stop_and_wait_manager.send_data(
-                data, filename, total_packets_sent
-            )
-            # No se usa?
-            _packet_received = stop_and_wait_manager.receive_packet(BUFFER)
-
-            total_bytes += packet_sent.size()
-
+            stop_and_wait_manager.send_data(data, filename)
             data = file.read(BUFFER)
 
-        logger.info("Upload complete!")
-        logger.info(f"Total bytes sent {total_bytes}")
-        logger.info(f"Total file bytes sent {total_file_bytes}")
-        logger.info(f"Total packets sent {total_packets_sent}")
+    stop_and_wait_manager.finish_connection(filename)
+    logger.info("Upload complete!")
+        # logger.info(f"Total bytes sent {total_bytes}")
+        # logger.info(f"Total file bytes sent {total_file_bytes}")
+        # logger.info(f"Total packets sent {total_packets_sent}")
 
 
 if __name__ == "__main__":
@@ -61,5 +57,6 @@ if __name__ == "__main__":
 
     # Hardcodeado, como lo calculo? Tengo que abrir el archivo dos veces?
     total_packets = 100
-
+    # TODO try catch
     upload_file(client_socket, args.name, args.src, logger)
+    #   TODO ver si cerrar el socket

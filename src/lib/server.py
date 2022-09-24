@@ -19,12 +19,24 @@ class Server:
             raise e
         self.logger.info(f"FTP server up in port {self.port}")
 
+        data, client_address = server_socket.recvfrom(BUFFER)
+        # TODO cola de mensajes para manejar multiples clientes
+        self.logger.info(f"Received first message from {client_address}")
+        packet = Packet.from_bytes(data)
+        self.logger.debug(f"Filsize received: {packet.payload}")
+
+        server_socket.sendto(Packet.ack_packet(), client_address)
+        self.logger.debug(f"ACK sent")
+
+
         while True:
-            server_socket.settimeout(100000)
+            server_socket.settimeout(100000) # TODO ver si sigue estando esto
             data, client_address = server_socket.recvfrom(BUFFER)
+            # TODO cola de mensajes para manejar multiples clientes
             self.logger.info(f"Received data from {client_address}")
             packet = Packet.from_bytes(data)
             self.logger.debug(f"Filename received: {packet.filename}")
+            #  TODO verificar que el archivo entra
             file = open(f"src/server/files/{packet.filename}", "wb")
 
             total_bytes_written = 0
@@ -40,14 +52,11 @@ class Server:
                     )
                     self.logger.debug(f"First 20 bytes received: {list(data[0:20])}")
 
-                    ack_packet = Packet(
-                        total_packets, "asd.txt", 0, 0, 1, 0, 0, 0, bytes("", "utf-8")
-                    )
                     file.write(packet.payload)
                     self.logger.debug(
-                        f"Sending ACK from paquet number {ack_packet.packet_number}"
+                        f"Sending ACK to  {client_address}"
                     )
-                    server_socket.sendto(ack_packet.to_bytes(), client_address)
+                    server_socket.sendto(Packet.ack_packet(), client_address)
                     total_bytes_written += len(packet.payload)
 
                     self.logger.debug(
@@ -59,6 +68,7 @@ class Server:
 
                     server_socket.settimeout(2)
                     data, client_address = server_socket.recvfrom(BUFFER)
+                    # TODO validar que el numero de paquete es el siguiente. si es el mismo que el actual mandar un ack
                     packet = Packet.from_bytes(data)
 
             except:
