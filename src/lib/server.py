@@ -15,7 +15,7 @@ class Server:
 
     def start(self):
         if not os.path.exists("%s" % BUCKET_DIRECTORY):
-            os.makedirs(BUCKET_DIRECTORY) 
+            os.makedirs(BUCKET_DIRECTORY)
         server_socket = self._create_socket()
         self.logger.info(f"FTP server up in port {self.port}")
 
@@ -36,31 +36,36 @@ class Server:
             try:
                 while data:
 
-                    
                     data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
                     packet = Packet.from_bytes(data)
                     self.logger.debug(
                         f"Data received from client {client_address}: {len(data)} bytes"
                     )
-                    if (packet.finished):
-                        self.logger.debug(f"Client: {client_address} finished. file saved: {packet.filename}")
+                    if packet.finished:
+                        self.logger.debug(
+                            f"Client: {client_address} finished. file saved: {packet.filename}"
+                        )
                         self._send_ack(server_socket, client_address)
                         file.close()
                         break
 
-                    if (packet.packet_number != packetscount):
-                        self.logger.debug(f"Packet number doesnt match: recv: {packet.packet_number}, own: {packetscount}")
-                        server_socket.sendto(Packet.ack_packet(packetscount-1), client_address)
+                    if packet.packet_number != packetscount:
+                        self.logger.debug(
+                            f"Packet number doesnt match: recv: {packet.packet_number}, own: {packetscount}"
+                        )
+                        server_socket.sendto(
+                            Packet.ack_packet(packetscount - 1), client_address
+                        )
                         continue
 
                     file.write(packet.payload)
                     packetscount += 1
                     self.logger.debug(f"Sending ACK to  {client_address}")
-                    server_socket.sendto(Packet.ack_packet(packet.packet_number), client_address)
-                    
+                    server_socket.sendto(
+                        Packet.ack_packet(packet.packet_number), client_address
+                    )
 
-
-            except Exception as e :
+            except Exception as e:
                 self.logger.info(e)
                 file.close()
                 self.logger.info("exception ocurred")

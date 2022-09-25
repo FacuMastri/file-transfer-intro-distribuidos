@@ -56,9 +56,11 @@ class StopAndWaitManager:
 
         packet_bytes, _packet_address = self.socket.recvfrom(Packet.HEADER_SIZE)
         packet = Packet.from_bytes(packet_bytes)
-        
-        if (packet.packet_number != self.packet_number):
-            self.logger.debug(f"Packet number doesnt match: recv:{packet.packet_number}, own:{self.packet_number}")
+
+        if packet.packet_number != self.packet_number:
+            self.logger.debug(
+                f"Packet number doesnt match: recv:{packet.packet_number}, own:{self.packet_number}"
+            )
             self.receive_ack()
 
         self.logger.info(f"ACK received: {packet.ack}")
