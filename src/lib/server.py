@@ -32,11 +32,12 @@ class Server:
             file = open(f"%s{packet.filename}" % BUCKET_DIRECTORY, "wb")
 
             packetscount = 0
-
+            # TODO poner un timeout para el caso que se caiga un cliente
             try:
                 while data:
+
+                    
                     data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
-                    # TODO validar que el numero de paquete es el siguiente. si es el mismo que el actual mandar un ack
                     packet = Packet.from_bytes(data)
                     self.logger.debug(
                         f"Data received from client {client_address}: {len(data)} bytes"
@@ -48,19 +49,21 @@ class Server:
                         break
 
                     if (packet.packet_number != packetscount):
-                        self.logger.debug(f"Packet number doesnt match: {packet.packet_number}, {packetscount}")
-                        server_socket.sendto(Packet.ack_packet(packet.packet_number-1), client_address)
+                        self.logger.debug(f"Packet number doesnt match: recv: {packet.packet_number}, own: {packetscount}")
+                        server_socket.sendto(Packet.ack_packet(packetscount-1), client_address)
                         continue
 
                     file.write(packet.payload)
+                    packetscount += 1
                     self.logger.debug(f"Sending ACK to  {client_address}")
                     server_socket.sendto(Packet.ack_packet(packet.packet_number), client_address)
-                    packetscount += 1
+                    
 
-            except:
+
+            except Exception as e :
+                self.logger.info(e)
                 file.close()
-                self.logger.info("File downloaded!")
-                self.logger.info(f"Total packets received: {packetscount}")
+                self.logger.info("exception ocurred")
 
     def _receive_filesize(self, server_socket):
         data, client_address = server_socket.recvfrom(SOCKET_BUFFER)

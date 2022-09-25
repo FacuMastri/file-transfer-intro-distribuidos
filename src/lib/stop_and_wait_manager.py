@@ -4,7 +4,7 @@ from lib.packet import Packet
 
 
 class StopAndWaitManager:
-    TIMEOUT = 200
+    TIMEOUT = 2
     RETRIES = 3
 
     def __init__(self, socket, server_address, logger):
@@ -53,6 +53,7 @@ class StopAndWaitManager:
         raise Exception  # TODO generate own exception
 
     def receive_ack(self):
+
         packet_bytes, _packet_address = self.socket.recvfrom(Packet.HEADER_SIZE)
         packet = Packet.from_bytes(packet_bytes)
         
