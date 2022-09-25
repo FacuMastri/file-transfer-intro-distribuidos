@@ -64,7 +64,7 @@ class Packet:
 
     @staticmethod
     def ack_packet():
-        # TODO agregar el numero de paquete para validar lo de la perdiad de acks en vuelo
+        # TODO agregar el numero de paquete para validar lo de la perdida de ACKs en vuelo
         packet = bytes([0, 0, 0, 0, 32, 0])
         return packet
 
@@ -107,7 +107,7 @@ class Packet:
         )
 
     def size(self) -> int:
-        return len(self.payload) + len(self.filename) + 6
+        return len(self.payload) + len(self.filename) + self.HEADER_SIZE
 
     def __str__(self):
         return "packet_number: {}, ack: {}, len(payload): {}".format(

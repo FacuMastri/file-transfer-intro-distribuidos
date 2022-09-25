@@ -4,7 +4,7 @@ from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_upload_args
 from lib.stop_and_wait_manager import StopAndWaitManager
 
-BUFFER = 1024
+READ_BUFFER = 1024
 # Green
 COLOR_UPLOAD = "\033[0;32m"
 END_COLOR = "\033[0m"
@@ -24,12 +24,11 @@ def upload_file(socket, filename, filepath, logger):
     logger.info("connection established")
 
     with open(filepath, "rb") as file:
-        logger.info("file opened")
-        data = file.read(BUFFER)
+        data = file.read(READ_BUFFER)
         # TODO hay que contar los paquetes que mandamos porque podemos perder un ack del server y el server guardaria 2 veces el mismo paquete
         while data:
             stop_and_wait_manager.send_data(data, filename)
-            data = file.read(BUFFER)
+            data = file.read(READ_BUFFER)
 
     stop_and_wait_manager.finish_connection(filename)
     logger.info("Upload complete!")

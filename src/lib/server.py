@@ -16,7 +16,8 @@ class Server:
     def start(self):
         server_socket = self._create_socket()
         self.logger.info(f"FTP server up in port {self.port}")
-        self._receive_filesize(server_socket)
+        #  TODO verificar que hay suficiente espacio en disco para el archivo
+        _filesize = self._receive_filesize(server_socket)
 
         while True:
             server_socket.settimeout(100000)  # TODO ver si sigue estando esto
@@ -39,7 +40,7 @@ class Server:
                     total_bytes_received += len(data)
                     total_packets += 1
                     self.logger.debug(
-                        f"Data received from client {client_address[0]}:{client_address[1]}: {len(data)} bytes"
+                        f"Data received from client {client_address}: {len(data)} bytes"
                     )
                     self.logger.debug(f"First 20 bytes received: {list(data[0:20])}")
 
@@ -73,6 +74,11 @@ class Server:
         self.logger.info(f"Received first message from {client_address}")
         packet = Packet.from_bytes(data)
         self.logger.debug(f"Filesize received: {packet.payload}")
+        self._send_ack(server_socket, client_address)
+
+        return packet.payload
+
+    def _send_ack(self, server_socket, client_address):
         server_socket.sendto(Packet.ack_packet(), client_address)
         self.logger.debug("ACK sent")
 
