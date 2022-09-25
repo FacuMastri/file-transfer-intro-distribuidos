@@ -72,7 +72,7 @@ class Packet:
     def from_bytes(bytes):
         packet_number: int = int.from_bytes(bytes[0:4], "big")
         flags: int = bytes[4]
-        # filename_lenth maximo es 255 caracteres (1 byte)
+        # filename_length máximo es 255 caracteres (1 byte)
         filename_length: int = bytes[5]
         filename: str = bytes[6 : 6 + filename_length].decode("utf-8")
         payload: bytes = bytes[6 + filename_length :]
