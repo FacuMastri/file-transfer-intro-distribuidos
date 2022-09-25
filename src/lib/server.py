@@ -14,59 +14,52 @@ class Server:
         self.logger = logger
 
     def start(self):
+        if not os.path.exists("%s" % BUCKET_DIRECTORY):
+            os.makedirs(BUCKET_DIRECTORY) 
         server_socket = self._create_socket()
         self.logger.info(f"FTP server up in port {self.port}")
-        #  TODO verificar que hay suficiente espacio en disco para el archivo
-        _filesize = self._receive_filesize(server_socket)
 
         while True:
-            server_socket.settimeout(100000)  # TODO ver si sigue estando esto
-            data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
+            server_socket.settimeout(100000)
+            data, client_address = self._receive_filesize(server_socket)
+            #  TODO verificar que hay suficiente espacio en disco para el archivo
+
             # TODO cola de mensajes para manejar multiples clientes
             self.logger.info(f"Received data from {client_address}")
             packet = Packet.from_bytes(data)
             self.logger.debug(f"Filename received: {packet.filename}")
-            #  TODO verificar que el archivo entra
-            if not os.path.exists("%s" % BUCKET_DIRECTORY):
-                os.makedirs(BUCKET_DIRECTORY)
+
             file = open(f"%s{packet.filename}" % BUCKET_DIRECTORY, "wb")
 
-            total_bytes_written = 0
-            total_bytes_received = 0
-            total_packets = 0
+            packetscount = 0
 
             try:
                 while data:
-                    total_bytes_received += len(data)
-                    total_packets += 1
-                    self.logger.debug(
-                        f"Data received from client {client_address}: {len(data)} bytes"
-                    )
-                    self.logger.debug(f"First 20 bytes received: {list(data[0:20])}")
-
-                    file.write(packet.payload)
-                    self.logger.debug(f"Sending ACK to  {client_address}")
-                    server_socket.sendto(Packet.ack_packet(), client_address)
-                    total_bytes_written += len(packet.payload)
-
-                    self.logger.debug(
-                        f"Writting data to {file.name}: {len(packet.payload)} bytes"
-                    )
-                    self.logger.debug(
-                        f"First 20 bytes written: {list(packet.payload[0:20])}"
-                    )
-
-                    server_socket.settimeout(2)
                     data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
                     # TODO validar que el numero de paquete es el siguiente. si es el mismo que el actual mandar un ack
                     packet = Packet.from_bytes(data)
+                    self.logger.debug(
+                        f"Data received from client {client_address}: {len(data)} bytes"
+                    )
+                    if (packet.finished):
+                        self.logger.debug(f"Client: {client_address} finished. file saved: {packet.filename}")
+                        self._send_ack(server_socket, client_address)
+                        file.close()
+                        break
+
+                    if (packet.packet_number != packetscount):
+                        self.logger.debug(f"Packet number doesnt match: {packet.packet_number}, {packetscount}")
+                        continue
+
+                    file.write(packet.payload)
+                    self.logger.debug(f"Sending ACK to  {client_address}")
+                    server_socket.sendto(Packet.ack_packet(packet.packet_number), client_address)
+                    packetscount += 1
 
             except:
                 file.close()
                 self.logger.info("File downloaded!")
-                self.logger.info(f"Total bytes received: {total_bytes_received}")
-                self.logger.info(f"Total bytes written in disk: {total_bytes_written}")
-                self.logger.info(f"Total packets received: {total_packets}")
+                self.logger.info(f"Total packets received: {packetscount}")
 
     def _receive_filesize(self, server_socket):
         data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
@@ -76,10 +69,10 @@ class Server:
         self.logger.debug(f"Filesize received: {packet.payload}")
         self._send_ack(server_socket, client_address)
 
-        return packet.payload
+        return data, client_address
 
     def _send_ack(self, server_socket, client_address):
-        server_socket.sendto(Packet.ack_packet(), client_address)
+        server_socket.sendto(Packet.ack_packet(0), client_address)
         self.logger.debug("ACK sent")
 
     def _create_socket(self):

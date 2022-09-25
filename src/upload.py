@@ -22,19 +22,17 @@ def upload_file(socket, filename, filepath, logger):
     logger.info(f"filesize {filesize.st_size}")
     stop_and_wait_manager.start_connection(filename, filesize.st_size)
     logger.info("connection established")
-
+    packetnumber = 0
     with open(filepath, "rb") as file:
         data = file.read(READ_BUFFER)
         # TODO hay que contar los paquetes que mandamos porque podemos perder un ack del server y el server guardaria 2 veces el mismo paquete
         while data:
-            stop_and_wait_manager.send_data(data, filename)
+            stop_and_wait_manager.send_data(data, filename, packetnumber)
             data = file.read(READ_BUFFER)
+            packetnumber += 1
 
     stop_and_wait_manager.finish_connection(filename)
     logger.info("Upload complete!")
-    # logger.info(f"Total bytes sent {total_bytes}")
-    # logger.info(f"Total file bytes sent {total_file_bytes}")
-    # logger.info(f"Total packets sent {total_packets_sent}")
 
 
 if __name__ == "__main__":
