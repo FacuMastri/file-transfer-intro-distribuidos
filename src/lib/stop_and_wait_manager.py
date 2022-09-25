@@ -10,27 +10,26 @@ class StopAndWaitManager:
         self.server_address = server_address
         self.logger = logger
 
-    def start_connection(self, filename, filesize:int):
-        packet_to_be_sent = Packet(0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize.st_size), "utf-8")) # sending filesize as payload
+    def start_connection(self, filename, filesize: int):
+        packet_to_be_sent = Packet(
+            0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize.st_size), "utf-8")
+        )  # sending filesize as payload
         self._send_packet(packet_to_be_sent)
 
     def finish_connection(self, filename):
-        packet_to_be_sent = Packet(0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")) # sending filesize as payload
+        packet_to_be_sent = Packet(
+            0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
+        )  # sending filesize as payload
         self._send_packet(packet_to_be_sent)
-
 
     def send_data(self, data, filename):
         packet_to_be_sent = Packet(0, 1, 0, 0, 0, 0, 0, filename, data)
         self._send_packet(packet_to_be_sent)
 
     def _send_packet(self, packet):
-        self.logger.debug(
-            f"Sending {packet.size()} bytes to {self.server_address}"
-        )
-        self.logger.debug(
-            f"First 20 bytes sent: {list(packet.payload[0:20])}"
-        )
-        sendcount = 0 
+        self.logger.debug(f"Sending {packet.size()} bytes to {self.server_address}")
+        self.logger.debug(f"First 20 bytes sent: {list(packet.payload[0:20])}")
+        sendcount = 0
         # TODO validar si hay 2 acks en vuelo de recibir el ack correcto. logica en el server, validar con el sendcount
         while sendcount < self.RETRIES:
             self.socket.settimeout(self.TIMEOUT)
@@ -47,18 +46,16 @@ class StopAndWaitManager:
         self.logger.error("Timeout limit reached. exiting")
         self.logger.error(f"sencount {sendcount}")
 
-        raise Exception # TODO generate own exception
-
+        raise Exception  # TODO generate own exception
 
     def receive_ack(self):
-        packetBytes, _packetAddress = self.socket.recvfrom(Packet.HEADERSIZE)
-        packet = Packet.from_bytes(packetBytes)
+        packet_bytes, _packet_address = self.socket.recvfrom(Packet.HEADER_SIZE)
+        packet = Packet.from_bytes(packet_bytes)
         self.logger.info(f"ACK recieved: {packet.ack}")
         # TODO validar que el ack paquet number coincida con el numero de paquete actual. si no coinciden se descarta el ack
         # si el cliente recibe un ack del pasado, descartarlo. es un mensaje que llego lento
-        if (not packet.ack):
-            raise Exception # TODO generate own exception
-
+        if not packet.ack:
+            raise Exception  # TODO generate own exception
 
     def receive_packet(self, socket_buffer_size):
         # self.socket.settimeout(2)

@@ -26,11 +26,10 @@ class Server:
         self.logger.debug(f"Filsize received: {packet.payload}")
 
         server_socket.sendto(Packet.ack_packet(), client_address)
-        self.logger.debug(f"ACK sent")
-
+        self.logger.debug("ACK sent")
 
         while True:
-            server_socket.settimeout(100000) # TODO ver si sigue estando esto
+            server_socket.settimeout(100000)  # TODO ver si sigue estando esto
             data, client_address = server_socket.recvfrom(BUFFER)
             # TODO cola de mensajes para manejar multiples clientes
             self.logger.info(f"Received data from {client_address}")
@@ -53,9 +52,7 @@ class Server:
                     self.logger.debug(f"First 20 bytes received: {list(data[0:20])}")
 
                     file.write(packet.payload)
-                    self.logger.debug(
-                        f"Sending ACK to  {client_address}"
-                    )
+                    self.logger.debug(f"Sending ACK to  {client_address}")
                     server_socket.sendto(Packet.ack_packet(), client_address)
                     total_bytes_written += len(packet.payload)
 

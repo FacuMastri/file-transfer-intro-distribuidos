@@ -38,6 +38,6 @@ def test_packet_no_name():
 
 def test_packet_size():
     payload = bytes("esto es una prueba", "utf-8")
-    packet = Packet(12,  1, 0, 0, 0, 0, 1, "donald.jpeg", payload)
+    packet = Packet(12, 1, 0, 0, 0, 0, 1, "donald.jpeg", payload)
 
     assert packet.size() == 35

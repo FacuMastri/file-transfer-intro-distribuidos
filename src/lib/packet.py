@@ -6,19 +6,14 @@ class Packet:
     1 bit si es upload o download
     1 bit de terminado
     1 bit esto es un ACK
-    2 bit de codigo de error
-    00 - nombre repetido
-    01 - todo ok
-    10 - reservado uso futuro
-    11 - reservado uso futuro
+    2 bit de codigo de error:  00 - nombre repetido, 01 - todo ok, 10 - reservado uso futuro, 11 - reservado uso futuro
     1 bit de SYN
     2 bit para version de protocolo
-    1 bytes para el largo del filename
+    1 byte para el largo del filename
     El resto para el payload
     """
-    HEADERSIZE = 6
 
-    # ACKPACKAGE = ]
+    HEADER_SIZE = 6
 
     def __init__(
         self,
@@ -58,7 +53,7 @@ class Packet:
         if self.version == 1:
             flags |= 0b0000_0001
 
-        packet = ( 
+        packet = (
             self.packet_number.to_bytes(4, "big")
             + flags.to_bytes(1, "big")
             + len(self.filename).to_bytes(1, "big")
@@ -67,11 +62,10 @@ class Packet:
         )
         return packet
 
-
     @staticmethod
     def ack_packet():
         # TODO agregar el numero de paquete para validar lo de la perdiad de acks en vuelo
-        packet = bytes([0, 0, 0, 0, 32, 0]) 
+        packet = bytes([0, 0, 0, 0, 32, 0])
         return packet
 
     @staticmethod
