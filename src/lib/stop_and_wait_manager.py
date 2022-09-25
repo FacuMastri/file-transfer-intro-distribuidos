@@ -9,6 +9,7 @@ class StopAndWaitManager:
 
     def __init__(self, socket, server_address, logger):
         self.socket = socket
+        # entidad de entrada que encapsula a la cola bloqueante y al socket. si es un socker hace recv, si es una cola hace get(true, timeout)
         self.server_address = server_address
         self.logger = logger
         self.packet_number = 0

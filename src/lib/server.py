@@ -30,6 +30,7 @@ class Server:
                 #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
                 worker = ClientWorker(queue.Queue(), client_address, packet.filename, self.logger)
                 self.logger.info(f"created new worker with filename {packet.filename}")
+                # TODO worker.iniciar_comunicacion
             else:
                 # worker.put(packet)
                 self.logger.info(f"gave packet to {client_address}")
