@@ -1,7 +1,10 @@
+import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.packet import Packet
 
-BUFFER = 4096
+BUCKET_DIRECTORY = "src/server/files/"
+
+SOCKET_BUFFER = 4096
 
 
 class Server:
@@ -11,32 +14,21 @@ class Server:
         self.logger = logger
 
     def start(self):
-        server_socket = socket(AF_INET, SOCK_DGRAM)
-        try:
-            server_socket.bind((self.host, self.port))
-        except Exception as e:
-            self.logger.error("Port already in use")
-            raise e
+        server_socket = self._create_socket()
         self.logger.info(f"FTP server up in port {self.port}")
-
-        data, client_address = server_socket.recvfrom(BUFFER)
-        # TODO cola de mensajes para manejar multiples clientes
-        self.logger.info(f"Received first message from {client_address}")
-        packet = Packet.from_bytes(data)
-        self.logger.debug(f"Filsize received: {packet.payload}")
-
-        server_socket.sendto(Packet.ack_packet(), client_address)
-        self.logger.debug("ACK sent")
+        self._receive_filesize(server_socket)
 
         while True:
             server_socket.settimeout(100000)  # TODO ver si sigue estando esto
-            data, client_address = server_socket.recvfrom(BUFFER)
+            data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
             # TODO cola de mensajes para manejar multiples clientes
             self.logger.info(f"Received data from {client_address}")
             packet = Packet.from_bytes(data)
             self.logger.debug(f"Filename received: {packet.filename}")
             #  TODO verificar que el archivo entra
-            file = open(f"src/server/files/{packet.filename}", "wb")
+            if not os.path.exists("%s" % BUCKET_DIRECTORY):
+                os.makedirs(BUCKET_DIRECTORY)
+            file = open(f"%s{packet.filename}" % BUCKET_DIRECTORY, "wb")
 
             total_bytes_written = 0
             total_bytes_received = 0
@@ -64,7 +56,7 @@ class Server:
                     )
 
                     server_socket.settimeout(2)
-                    data, client_address = server_socket.recvfrom(BUFFER)
+                    data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
                     # TODO validar que el numero de paquete es el siguiente. si es el mismo que el actual mandar un ack
                     packet = Packet.from_bytes(data)
 
@@ -74,6 +66,24 @@ class Server:
                 self.logger.info(f"Total bytes received: {total_bytes_received}")
                 self.logger.info(f"Total bytes written in disk: {total_bytes_written}")
                 self.logger.info(f"Total packets received: {total_packets}")
+
+    def _receive_filesize(self, server_socket):
+        data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
+        # TODO cola de mensajes para manejar multiples clientes
+        self.logger.info(f"Received first message from {client_address}")
+        packet = Packet.from_bytes(data)
+        self.logger.debug(f"Filesize received: {packet.payload}")
+        server_socket.sendto(Packet.ack_packet(), client_address)
+        self.logger.debug("ACK sent")
+
+    def _create_socket(self):
+        server_socket = socket(AF_INET, SOCK_DGRAM)
+        try:
+            server_socket.bind((self.host, self.port))
+        except Exception as e:
+            self.logger.error("Port already in use")
+            raise e
+        return server_socket
 
     def stop(self):
         raise NotImplementedError()

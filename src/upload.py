@@ -11,8 +11,8 @@ END_COLOR = "\033[0m"
 
 
 def upload_file(socket, filename, filepath, logger):
-    logger.error(f"File {filepath} does not exist")
     if not os.path.isfile(filepath):
+        logger.error(f"File {filepath} does not exist")
         return
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
 
@@ -20,7 +20,7 @@ def upload_file(socket, filename, filepath, logger):
 
     filesize = os.stat(filepath)
     logger.info(f"filesize {filesize.st_size}")
-    stop_and_wait_manager.start_connection(filename, filesize)
+    stop_and_wait_manager.start_connection(filename, filesize.st_size)
     logger.info("connection established")
 
     with open(filepath, "rb") as file:
