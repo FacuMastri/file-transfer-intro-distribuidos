@@ -41,7 +41,6 @@ class StopAndWaitManager:
                 self.socket.sendto(packet.to_bytes(), self.server_address)
                 self.logger.info("Packet sent")
                 self.receive_ack()
-                self.logger.info("ACK received")
                 return
             except:
                 self.logger.error("Timeout event occurred")
