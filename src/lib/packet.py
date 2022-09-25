@@ -64,8 +64,6 @@ class Packet:
 
     @staticmethod
     def ack_packet(packetnumber):
-        # TODO agregar el numero de paquete para validar lo de la perdida de ACKs en vuelo
-
         packet = packetnumber.to_bytes(4, "big") + bytes([32, 0])
         return packet
 

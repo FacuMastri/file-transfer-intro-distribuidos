@@ -49,6 +49,7 @@ class Server:
 
                     if (packet.packet_number != packetscount):
                         self.logger.debug(f"Packet number doesnt match: {packet.packet_number}, {packetscount}")
+                        server_socket.sendto(Packet.ack_packet(packet.packet_number-1), client_address)
                         continue
 
                     file.write(packet.payload)

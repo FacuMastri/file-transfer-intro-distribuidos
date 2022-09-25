@@ -1,3 +1,5 @@
+from asyncio import current_task
+from black import re_compile_maybe_verbose
 from lib.packet import Packet
 
 
@@ -9,6 +11,7 @@ class StopAndWaitManager:
         self.socket = socket
         self.server_address = server_address
         self.logger = logger
+        self.packet_number = 0
 
     def start_connection(self, filename, filesize: int):
         packet_to_be_sent = Packet(
@@ -20,17 +23,18 @@ class StopAndWaitManager:
         packet_to_be_sent = Packet(
             0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
         )  # sending filesize as payload
+        self.packet_number = 0
         self._send_packet(packet_to_be_sent)
 
-    def send_data(self, data, filename, packetnumber):
-        packet_to_be_sent = Packet(packetnumber, 1, 0, 0, 0, 0, 0, filename, data)
+    def send_data(self, data, filename):
+        packet_to_be_sent = Packet(self.packet_number, 1, 0, 0, 0, 0, 0, filename, data)
         self._send_packet(packet_to_be_sent)
+        self.packet_number += 1
 
     def _send_packet(self, packet):
         self.logger.debug(f"Sending {packet.size()} bytes to {self.server_address}")
         self.logger.debug(f"First 20 bytes sent: {list(packet.payload[0:20])}")
         send_count = 0
-        # TODO validar si hay 2 acks en vuelo de recibir el ack correcto. logica en el server, validar con el send_count
         while send_count < self.RETRIES:
             self.socket.settimeout(self.TIMEOUT)
             try:
@@ -51,9 +55,12 @@ class StopAndWaitManager:
     def receive_ack(self):
         packet_bytes, _packet_address = self.socket.recvfrom(Packet.HEADER_SIZE)
         packet = Packet.from_bytes(packet_bytes)
+        
+        if (packet.packet_number != self.packet_number):
+            self.logger.debug(f"Packet number doesnt match: recv:{packet.packet_number}, own:{self.packet_number}")
+            self.receive_ack()
+
         self.logger.info(f"ACK received: {packet.ack}")
-        # TODO validar que el ack paquet number coincida con el numero de paquete actual. si no coinciden se descarta el ack
-        # si el cliente recibe un ack del pasado, descartarlo. es un mensaje que llego lento
         if not packet.ack:
             raise Exception  # TODO generate own exception
 
