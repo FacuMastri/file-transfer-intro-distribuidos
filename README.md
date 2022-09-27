@@ -4,13 +4,20 @@
 
 First start the server
 
-    python3 src/start_server.py -v
+     python3 src/start_server.py -v -H 127.0.0.1 -p 12000
 
 Open a new terminal and upload a file
 
-    python3 src/upload.py -v --src src/donald.jpeg --name donald.jpeg
+     python3 src/upload.py -v -H 127.0.0.1 -p 12000 --src src/donald.jpeg --name donald.jpeg
 
-Then check new file in server/donald.jpeg
+
+Then check new file in `server/files/donald.jpeg`
+
+## Test with packet loss
+
+`device` parameter should be the name of the network interface (e.g. `eth0`) and it can be found with `wireshark`
+
+    comcast -device=lo --packet-loss=10% -target-addr=127.0.0.1
 
 ## Dependencies
 

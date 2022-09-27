@@ -2,7 +2,7 @@ import argparse
 import logging
 
 DEFAULT_SERVER_PORT = 12000
-DEFAULT_SERVER_ADDRESS = "localhost"
+DEFAULT_SERVER_ADDRESS = "127.0.0.1"
 
 
 def make_parser(description):
@@ -66,6 +66,8 @@ def get_server_args(args):
     else:
         debug_level = logging.INFO
 
-    server_port = DEFAULT_SERVER_PORT if args.port is None else int(args.port)
+    args.port = DEFAULT_SERVER_PORT if args.port is None else args.port
+    args.host = DEFAULT_SERVER_ADDRESS if args.host is None else args.host
+    args.debug_level = debug_level
 
-    return server_port, debug_level
+    return args

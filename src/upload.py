@@ -16,7 +16,7 @@ def upload_file(socket, filename, filepath, logger):
         return
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
 
-    stop_and_wait_manager = StopAndWaitManager(socket, svr_addr, logger)
+    stop_and_wait_manager = StopAndWaitManager(socket, server_address, logger)
 
     filesize = os.stat(filepath)
     logger.info(f"filesize {filesize.st_size}")
@@ -42,10 +42,10 @@ if __name__ == "__main__":
     logging.debug(f"Setting {logging.getLevelName(args.debug_level)} log level")
 
     client_socket = socket(AF_INET, SOCK_DGRAM)
-    svr_addr = (args.host, args.port)
+    server_address = (args.host, int(args.port))
 
     logging.info("FTP client up")
-    logging.info(f"FTP server address {svr_addr}")
+    logging.info(f"FTP server address {server_address}")
     logger = logging.getLogger(__name__)
 
     # Hardcodeado, como lo calculo? Tengo que abrir el archivo dos veces?

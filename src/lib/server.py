@@ -17,9 +17,9 @@ class Server:
 
     def start(self):
         if not os.path.exists("%s" % BUCKET_DIRECTORY):
-            os.makedirs(BUCKET_DIRECTORY) 
+            os.makedirs(BUCKET_DIRECTORY)
         server_socket = self._create_socket()
-        self.logger.info(f"FTP server up in port {self.port}")
+        self.logger.info(f"FTP server up in port {(self.host, self.port)}")
         # TODO cola de mensajes para manejar multiples clientes
         worker = True
         while True:
@@ -28,7 +28,9 @@ class Server:
             packet = Packet.from_bytes(data)
             if packet.syn:
                 #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
-                worker = ClientWorker(queue.Queue(), client_address, packet.filename, self.logger)
+                worker = ClientWorker(
+                    queue.Queue(), client_address, packet.filename, self.logger
+                )
                 self.logger.info(f"created new worker with filename {packet.filename}")
                 # TODO worker.iniciar_comunicacion
             else:
@@ -36,7 +38,7 @@ class Server:
                 self.logger.info(f"gave packet to {client_address}")
                 worker.receive_packet(packet)
             # vuelve al loop
-                    
+
     def _create_socket(self):
         server_socket = socket(AF_INET, SOCK_DGRAM)
         try:

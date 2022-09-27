@@ -2,12 +2,12 @@ class Packet:
     """
     Header size = 6 bytes
     Estructura del paquete
-    4 bytes para el numero de paquete
+    4 bytes para el numero de paquete. El packet_number = 0 se usa tanto para el inicio o cierre de conexion
     1 bit si es upload o download
     1 bit de terminado
     1 bit esto es un ACK
     2 bit de codigo de error:  00 - nombre repetido, 01 - todo ok, 10 - reservado uso futuro, 11 - reservado uso futuro
-    1 bit de SYN
+    1 bit de SYN, tanto para inicio como cierre de conexion
     2 bit para version de protocolo
     1 byte para el largo del filename
     El resto para el payload
@@ -63,18 +63,18 @@ class Packet:
         return packet
 
     @staticmethod
-    def ack_packet(packetnumber):
-        packet = packetnumber.to_bytes(4, "big") + bytes([32, 0])
+    def ack_packet(packet_number: int):
+        packet = packet_number.to_bytes(4, "big") + bytes([32, 0])
         return packet
 
     @staticmethod
-    def from_bytes(bytes):
+    def from_bytes(bytes: bytes):
         packet_number: int = int.from_bytes(bytes[0:4], "big")
         flags: int = bytes[4]
         # filename_length máximo es 255 caracteres (1 byte)
         filename_length: int = bytes[5]
-        filename: str = bytes[6 : 6 + filename_length].decode("utf-8")
-        payload: bytes = bytes[6 + filename_length :]
+        filename: str = bytes[6: 6 + filename_length].decode("utf-8")
+        payload: bytes = bytes[6 + filename_length:]
         is_upload = False
         finished = False
         ack = False

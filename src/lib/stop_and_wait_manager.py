@@ -1,5 +1,3 @@
-from asyncio import current_task
-from black import re_compile_maybe_verbose
 from lib.packet import Packet
 
 
@@ -34,21 +32,20 @@ class StopAndWaitManager:
 
     def _send_packet(self, packet):
         self.logger.debug(f"Sending {packet.size()} bytes to {self.server_address}")
-        self.logger.debug(f"First 20 bytes sent: {list(packet.payload[0:20])}")
         send_count = 0
         while send_count < self.RETRIES:
             self.socket.settimeout(self.TIMEOUT)
             try:
                 self.socket.sendto(packet.to_bytes(), self.server_address)
-                self.logger.info("Packet sent")
+                self.logger.info(f"Packet sent with ({packet})")
                 self.receive_ack()
                 return
             except:
                 self.logger.error("Timeout event occurred")
                 send_count += 1
 
-        self.logger.error("Timeout limit reached. exiting")
-        self.logger.error(f"send count {send_count}")
+        self.logger.error("Timeout limit reached. Exiting")
+        self.logger.error(f"Send count: {send_count}")
 
         raise Exception  # TODO generate own exception
 
