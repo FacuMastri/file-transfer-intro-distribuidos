@@ -47,7 +47,7 @@ class ClientWorker:
 
             self.file.write(packet.payload)
             self.packet_number += 1
-            self.logger.debug(f"Sending ACK to  {self.client_address}")
+            self.logger.debug(f"Sending ACK to {self.client_address}")
             self.socket.sendto(
                 Packet.ack_packet(packet.packet_number), self.client_address
             )
