@@ -28,7 +28,7 @@ class ClientWorker:
         # hay que hacer una entidad que encapsule a la cola y al socket al mismo tiempo. asi cuando hago un recv/pop desde el cliente o el worker funciona de la misma manera
         # ese pop tiene que ser bloqueante y timeouteado. la cola provee esas funcionalidades.
         try:
-            if packet.finished:
+            if packet.is_finished():
                 self.logger.debug(
                     f"Client: {self.client_address} finished. file saved: {packet.filename}"
                 )

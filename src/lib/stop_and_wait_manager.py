@@ -68,6 +68,6 @@ class StopAndWaitManager:
             )
             self.receive_ack()
 
-        self.logger.info(f"ACK received: {packet.ack}")
-        if not packet.ack:
+        self.logger.info(f"ACK received: {packet.is_ack()}")
+        if not packet.is_ack():
             raise AckNotReceivedError

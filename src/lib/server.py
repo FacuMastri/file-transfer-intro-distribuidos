@@ -28,7 +28,7 @@ class Server:
             data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
             self.logger.info(f"Received message from {client_address}")
             packet = Packet.from_bytes(data)
-            if packet.syn:
+            if packet.is_syn():
                 #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
                 worker = ClientWorker(
                     queue.Queue(), client_address, packet.filename, self.logger

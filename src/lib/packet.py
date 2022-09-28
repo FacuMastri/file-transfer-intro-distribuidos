@@ -108,7 +108,16 @@ class Packet:
     def size(self) -> int:
         return len(self.payload) + len(self.filename) + self.HEADER_SIZE
 
+    def is_finished(self):
+        return self.finished
+
+    def is_ack(self):
+        return self.ack
+
+    def is_syn(self):
+        return self.syn
+
     def __str__(self):
-        return "packet_number: {}, ack: {}, len(payload): {}".format(
-            self.packet_number, self.ack, len(self.payload)
+        return "packet_number: {}, ack: {}, len(payload): {}, packet_size: {}".format(
+            self.packet_number, self.ack, len(self.payload), self.size()
         )
