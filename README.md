@@ -19,6 +19,10 @@ Then check new file in `server/files/donald.jpeg`
 
     comcast -device=lo --packet-loss=10% -target-addr=127.0.0.1
 
+To stop the packet loss
+
+    comcast -device=lo --stop
+
 ## Dependencies
 
 Creating virtual environment
