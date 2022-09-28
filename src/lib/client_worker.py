@@ -1,4 +1,4 @@
-import os, queue
+import os
 from lib.packet import Packet
 from socket import AF_INET, SOCK_DGRAM, socket
 

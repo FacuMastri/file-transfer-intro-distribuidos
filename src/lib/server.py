@@ -1,7 +1,9 @@
-import os, queue
+import os
+import queue
 from socket import AF_INET, SOCK_DGRAM, socket
-from lib.packet import Packet
+
 from lib.client_worker import ClientWorker
+from lib.packet import Packet
 
 BUCKET_DIRECTORY = "src/server/files/"
 
@@ -10,7 +12,7 @@ SERVER_TIMEOUT = 10
 
 
 class Server:
-    def __init__(self, host, port, logger):
+    def __init__(self, host: str, port: int, logger):
         self.host = host
         self.port = port
         self.logger = logger
@@ -31,7 +33,7 @@ class Server:
                 worker = ClientWorker(
                     queue.Queue(), client_address, packet.filename, self.logger
                 )
-                self.logger.info(f"created new worker with filename {packet.filename}")
+                self.logger.info(f"Created new worker with filename {packet.filename}")
                 # TODO worker.iniciar_comunicacion
             else:
                 # worker.put(packet)

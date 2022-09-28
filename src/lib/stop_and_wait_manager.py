@@ -1,6 +1,14 @@
 from lib.packet import Packet
 
 
+class MaximumRetriesReachedError(Exception):
+    pass
+
+
+class AckNotReceivedError(Exception):
+    pass
+
+
 class StopAndWaitManager:
     TIMEOUT = 2
     RETRIES = 3
@@ -47,7 +55,7 @@ class StopAndWaitManager:
         self.logger.error("Timeout limit reached. Exiting")
         self.logger.error(f"Send count: {send_count}")
 
-        raise Exception  # TODO generate own exception
+        raise MaximumRetriesReachedError
 
     def receive_ack(self):
 
@@ -62,7 +70,4 @@ class StopAndWaitManager:
 
         self.logger.info(f"ACK received: {packet.ack}")
         if not packet.ack:
-            raise Exception  # TODO generate own exception
-
-    def stop(self):
-        raise NotImplementedError
+            raise AckNotReceivedError

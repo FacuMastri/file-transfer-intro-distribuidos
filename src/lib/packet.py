@@ -73,8 +73,8 @@ class Packet:
         flags: int = bytes[4]
         # filename_length máximo es 255 caracteres (1 byte)
         filename_length: int = bytes[5]
-        filename: str = bytes[6: 6 + filename_length].decode("utf-8")
-        payload: bytes = bytes[6 + filename_length:]
+        filename: str = bytes[6 : 6 + filename_length].decode("utf-8")
+        payload: bytes = bytes[6 + filename_length :]
         is_upload = False
         finished = False
         ack = False

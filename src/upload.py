@@ -2,7 +2,7 @@ import logging
 import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_upload_args
-from lib.stop_and_wait_manager import StopAndWaitManager
+from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError
 
 READ_BUFFER = 1024
 # Green
@@ -10,7 +10,7 @@ COLOR_UPLOAD = "\033[0;32m"
 END_COLOR = "\033[0m"
 
 
-def upload_file(socket, filename, filepath, logger):
+def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
     if not os.path.isfile(filepath):
         logger.error(f"File {filepath} does not exist")
         return
@@ -48,7 +48,8 @@ if __name__ == "__main__":
     logging.info(f"FTP server address {server_address}")
     logger = logging.getLogger(__name__)
 
-    # Hardcodeado, como lo calculo? Tengo que abrir el archivo dos veces?
-    total_packets = 100
-    # TODO try catch
-    upload_file(client_socket, args.name, args.src, logger)
+    try:
+        upload_file(client_socket, args.name, args.src, logger)
+    except MaximumRetriesReachedError:
+        logger.error("Maximum retries reached")
+        client_socket.close()
