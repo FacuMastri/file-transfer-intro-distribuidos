@@ -10,7 +10,8 @@ class Packet:
     1 bit de SYN, tanto para inicio de conexion
     2 bit para version de protocolo
     1 byte para el largo del filename
-    El resto para el payload. En ocasiones el payload puede contener el filename
+    N bytes para el filename, donde N = largo del filename
+    El resto para el payload.
     """
 
     HEADER_SIZE = 6
