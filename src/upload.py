@@ -52,4 +52,6 @@ if __name__ == "__main__":
         upload_file(client_socket, args.name, args.src, logger)
     except MaximumRetriesReachedError:
         logger.error("Maximum retries reached")
+    finally:
+        logger.info("Closing socket")
         client_socket.close()

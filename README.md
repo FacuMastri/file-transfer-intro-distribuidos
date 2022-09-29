@@ -15,11 +15,11 @@ Then check new file in `server/files/donald.jpeg`
 
 ## Test with packet loss
 
-`device` parameter should be the name of the network interface (e.g. `eth0`) and it can be found with `wireshark`
+We use [comcast](https://github.com/tylertreat/comcast) to simulate packet loss. `device` parameter should be the name of the network interface (e.g. `eth0`) and it can be found with `wireshark`
 
     comcast -device=lo --packet-loss=10% -target-addr=127.0.0.1
 
-To stop the packet loss
+To stop the packet loss. `device` parameter must be the same as before
 
     comcast -device=lo --stop
 
