@@ -41,7 +41,8 @@ class ClientWorker:
                     f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
                 )
                 self.socket.sendto(
-                    Packet.ack_packet(self.packet_number - 1).to_bytes(), self.client_address
+                    Packet.ack_packet(self.packet_number - 1).to_bytes(),
+                    self.client_address,
                 )
                 return  # TODO esto deberia ser un continue cuando haya hilos
 
