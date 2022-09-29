@@ -16,7 +16,7 @@ class ClientWorker:
         self.logger = logger
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.sendto(
-            Packet.ack_packet(0), self.client_address
+            Packet.ack_packet(0).to_bytes(), self.client_address
         )  # TODO esto no deberia estar aca
 
     def receive_packet(self, packet):
@@ -41,7 +41,7 @@ class ClientWorker:
                     f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
                 )
                 self.socket.sendto(
-                    Packet.ack_packet(self.packet_number - 1), self.client_address
+                    Packet.ack_packet(self.packet_number - 1).to_bytes(), self.client_address
                 )
                 return  # TODO esto deberia ser un continue cuando haya hilos
 
@@ -49,7 +49,7 @@ class ClientWorker:
             self.packet_number += 1
             self.logger.debug(f"Sending ACK to {self.client_address}")
             self.socket.sendto(
-                Packet.ack_packet(packet.packet_number), self.client_address
+                Packet.ack_packet(packet.packet_number).to_bytes(), self.client_address
             )
 
         except Exception as e:
@@ -62,5 +62,5 @@ class ClientWorker:
         self.input_queue.put(packet)
 
     def _send_ack(self, server_socket, client_address):
-        server_socket.sendto(Packet.ack_packet(0), client_address)
+        server_socket.sendto(Packet.ack_packet(0).to_bytes(), client_address)
         self.logger.debug("ACK sent, file correctly received")

@@ -7,10 +7,10 @@ class Packet:
     1 bit de terminado
     1 bit esto es un ACK
     2 bit de codigo de error:  00 - nombre repetido, 01 - todo ok, 10 - reservado uso futuro, 11 - reservado uso futuro
-    1 bit de SYN, tanto para inicio como cierre de conexion
+    1 bit de SYN, tanto para inicio de conexion
     2 bit para version de protocolo
     1 byte para el largo del filename
-    El resto para el payload
+    El resto para el payload. En ocasiones el payload puede contener el filename
     """
 
     HEADER_SIZE = 6
@@ -64,8 +64,18 @@ class Packet:
 
     @staticmethod
     def ack_packet(packet_number: int):
-        packet = packet_number.to_bytes(4, "big") + bytes([32, 0])
-        return packet
+        # packet = packet_number.to_bytes(4, "big") + bytes([32, 0])
+        return Packet(
+            packet_number=packet_number,
+            is_upload=False,
+            finished=False,
+            ack=True,
+            syn=False,
+            status_code=1,
+            version=0,
+            filename="",
+            payload=bytes(),
+        )
 
     @staticmethod
     def from_bytes(bytes: bytes):
@@ -108,13 +118,13 @@ class Packet:
     def size(self) -> int:
         return len(self.payload) + len(self.filename) + self.HEADER_SIZE
 
-    def is_finished(self):
+    def is_finished(self) -> bool:
         return self.finished
 
-    def is_ack(self):
+    def is_ack(self) -> bool:
         return self.ack
 
-    def is_syn(self):
+    def is_syn(self) -> bool:
         return self.syn
 
     def __str__(self):
