@@ -86,7 +86,7 @@ class StopAndWaitManager:
         return False
 
     def send_ack(self, packet_number):
-        self.logger.debug(f"Sending ACK to server")
+        self.logger.debug(f"Sending ACK number {packet_number} to server")
         self.socket.sendto(Packet.ack_packet(packet_number).to_bytes(), self.server_address)
 
     def receive_ack(self):
