@@ -1,3 +1,5 @@
+import os
+from tkinter import E
 from lib.packet import Packet
 
 
@@ -12,6 +14,7 @@ class AckNotReceivedError(Exception):
 class StopAndWaitManager:
     TIMEOUT = 2
     RETRIES = 3
+    SOCKET_BUFFER = 1024
 
     def __init__(self, socket, server_address, logger):
         self.socket = socket
@@ -20,13 +23,19 @@ class StopAndWaitManager:
         self.logger = logger
         self.packet_number = 0
 
-    def start_connection(self, filename, filesize: int):
+    def start_upload_connection(self, filename, filesize: int):
         packet_to_be_sent = Packet(
             0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8")
         )  # sending filesize as payload
         self._send_packet(packet_to_be_sent)
 
-    def finish_connection(self, filename):
+    def start_download_connection(self, filename):
+        packet_to_be_sent = Packet(
+            0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8")
+        )
+        self._send_packet(packet_to_be_sent)
+
+    def finish_upload_connection(self, filename):
         packet_to_be_sent = Packet(
             0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
         )  # sending filesize as payload
@@ -56,6 +65,29 @@ class StopAndWaitManager:
         self.logger.error(f"Send count: {send_count}")
 
         raise MaximumRetriesReachedError
+
+    def receive_data(self, file):
+        data = self.socket.recvfrom(self.SOCKET_BUFFER)[0]
+        packet = Packet.from_bytes(data)
+        
+        if packet.is_finished():
+            self.send_ack(self, 0)
+            return True
+
+        if packet.packet_number != self.packet_number:
+            self.logger.debug(
+                f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
+            )
+            self.send_ack(self, self.packet_number - 1)
+        else:
+            file.write(packet.payload)
+            self.packet_number += 1
+            self.send_ack(self, packet.packet_number)
+        return False
+
+    def send_ack(self, packet_number):
+        self.logger.debug(f"Sending ACK to server")
+        self.socket.sendto(Packet.ack_packet(packet_number).to_bytes(), self.server_address)
 
     def receive_ack(self):
 
