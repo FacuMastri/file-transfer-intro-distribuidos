@@ -30,7 +30,7 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
             stop_and_wait_manager.send_data(data, filename)
             data = file.read(READ_BUFFER)
 
-    stop_and_wait_manager.finish_upload_connection(filename)
+    stop_and_wait_manager.finish_connection(filename)
     logger.info("Upload complete!")
 
 

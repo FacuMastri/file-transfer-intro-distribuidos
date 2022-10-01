@@ -32,7 +32,7 @@ class StopAndWaitManager:
         packet_to_be_sent = Packet(0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8"))
         self._send_packet(packet_to_be_sent)
 
-    def finish_upload_connection(self, filename):
+    def finish_connection(self, filename):
         packet_to_be_sent = Packet(
             0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
         )  # sending filesize as payload
@@ -66,6 +66,7 @@ class StopAndWaitManager:
     def receive_data(self):
         data, _address = self.input_stream.receive()
         packet = Packet.from_bytes(data)
+        self.logger.info(f"{packet}")
         # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(

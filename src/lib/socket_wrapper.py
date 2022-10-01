@@ -1,6 +1,6 @@
 
 class SocketWrapper:
-    SOCKET_BUFFER = 1024
+    SOCKET_BUFFER = 4096
 
     def __init__(self, socket):
         self.socket = socket

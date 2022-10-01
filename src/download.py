@@ -1,7 +1,7 @@
 import logging
 import os
 from socket import AF_INET, SOCK_DGRAM, socket
-from lib.parser import parse_upload_args
+from lib.parser import parse_download_args
 from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError
 from logger import initialize_logger
 from lib.socket_wrapper import SocketWrapper
@@ -11,8 +11,8 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
     input_socket = SocketWrapper(socket)
     stop_and_wait_manager = StopAndWaitManager(socket, input_socket, server_address, logger)
 
-    file = open(f"%s{filename}" % filepath, "wb")
     stop_and_wait_manager.start_download_connection(filename)
+    file = open(f"%s{filename}" % filepath, "wb")
     logger.info("connection established")
 
     payload = 1
@@ -31,13 +31,13 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
 
 
 if __name__ == "__main__":
-    args = parse_upload_args()
+    args = parse_download_args()
     client_socket = socket(AF_INET, SOCK_DGRAM)
     server_address = (args.host, int(args.port))
     logger = initialize_logger(args, server_address)
 
     try:
-        download_file(client_socket, args.name, args.src, logger)
+        download_file(client_socket, args.name, args.dst, logger)
     except MaximumRetriesReachedError:
         logger.error("Maximum retries reached")
     finally:
