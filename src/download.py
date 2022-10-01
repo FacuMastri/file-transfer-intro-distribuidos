@@ -4,21 +4,23 @@ from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_upload_args
 from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError
 from logger import initialize_logger
-
+from lib.socket_wrapper import SocketWrapper
 
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
     logger.info(f"Downloading {filename} from FTP server to {filepath}")
-
-    stop_and_wait_manager = StopAndWaitManager(socket, server_address, logger)
+    input_socket = SocketWrapper(socket)
+    stop_and_wait_manager = StopAndWaitManager(socket, input_socket, server_address, logger)
 
     file = open(f"%s{filename}" % filepath, "wb")
     stop_and_wait_manager.start_download_connection(filename)
     logger.info("connection established")
 
-    finished = False
+    payload = 1
     try:
-        while not finished:
-            finished = stop_and_wait_manager.receive_data(filepath, file)
+        while payload:
+            payload = stop_and_wait_manager.receive_data()
+            logger.info(f"received payload from {server_address}")
+            file.write(payload)
         file.close()
         logger.info(f"Download complete for file: {filename}!")
     except Exception as e:

@@ -25,6 +25,7 @@ class Server:
         # TODO cola de mensajes para manejar multiples clientes
         worker = True
         worker_q = True
+        workers = {}
         while True:
             data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
             self.logger.info(f"Received message from {client_address}")
@@ -33,19 +34,16 @@ class Server:
                 #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
 
                 worker_q = queue.Queue()
+                # TODO ver si es up o down y crear un hilo acorde
                 worker = ClientWorker(
-                    worker_q, client_address, packet.filename, self.logger
+                    worker_q, client_address, packet.filename, self.logger, False
                 )
+                workers[client_address] = worker
+                workers[client_address].start()
                 self.logger.info(f"Created new worker with filename {packet.filename}")
-                # TODO worker.iniciar_comunicacion
             else:
-                # worker.put(packet)
                 self.logger.info(f"gave packet to {client_address}")
-                worker_q.put((data, client_address))
-                self.logger.info(f"puted packet")
-
-                worker.receive_packet()
-            # vuelve al loop
+                workers[client_address].put((data, client_address))
 
     def _create_socket(self):
         server_socket = socket(AF_INET, SOCK_DGRAM)

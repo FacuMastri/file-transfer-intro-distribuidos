@@ -66,14 +66,14 @@ class StopAndWaitManager:
     def receive_data(self):
         data, _address = self.input_stream.receive()
         packet = Packet.from_bytes(data)
-
+        # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(
                 f"Comunication with {self.server_address} finished."
             )
             self.send_ack(0)
             return packet.payload
-        # TODO ver si se puede mejorar el return este ^
+        # TODO ver si se puede mejorar el return este ^ ver que devolver en el caso de que termino
         if packet.packet_number != self.packet_number:
             self.logger.debug(
                 f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
