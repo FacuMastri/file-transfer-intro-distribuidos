@@ -2,6 +2,7 @@ import logging
 import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_upload_args
+from lib.socket_wrapper import SocketWrapper
 from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError
 from logger import initialize_logger
 
@@ -16,8 +17,8 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
         logger.error(f"File {filepath} does not exist")
         return
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
-
-    stop_and_wait_manager = StopAndWaitManager(socket, server_address, logger)
+    input_socket = SocketWrapper(socket)
+    stop_and_wait_manager = StopAndWaitManager(socket, input_socket, server_address, logger)
 
     filesize = os.stat(filepath)
     logger.info(f"filesize {filesize.st_size}")

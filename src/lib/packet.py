@@ -65,7 +65,6 @@ class Packet:
 
     @staticmethod
     def ack_packet(packet_number: int):
-        # packet = packet_number.to_bytes(4, "big") + bytes([32, 0])
         return Packet(
             packet_number=packet_number,
             is_upload=False,
