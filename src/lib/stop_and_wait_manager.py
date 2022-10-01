@@ -1,16 +1,5 @@
+from lib.exceptions import MaximumRetriesReachedError, AckNotReceivedError, OldPacketReceivedError
 from lib.packet import Packet
-
-
-class MaximumRetriesReachedError(Exception):
-    pass
-
-
-class AckNotReceivedError(Exception):
-    pass
-
-
-class OldPacketReceivedError(Exception):
-    pass
 
 
 class StopAndWaitManager:
@@ -73,9 +62,7 @@ class StopAndWaitManager:
         self.logger.info(f"{packet}")
         # TODO validacion de errores del packete
         if packet.is_finished():
-            self.logger.debug(
-                f"Comunication with {self.server_address} finished."
-            )
+            self.logger.debug(f"Comunication with {self.server_address} finished.")
             self.send_ack(0)
             return packet.payload
         # TODO ver si se puede mejorar el return este ^ ver que devolver en el caso de que termino
@@ -92,7 +79,9 @@ class StopAndWaitManager:
         return packet.payload
 
     def send_ack(self, packet_number):
-        self.logger.debug(f"Sending ACK number {packet_number} to {self.server_address}")
+        self.logger.debug(
+            f"Sending ACK number {packet_number} to {self.server_address}"
+        )
         self.output_socket.sendto(
             Packet.ack_packet(packet_number).to_bytes(), self.server_address
         )

@@ -32,7 +32,11 @@ class Server:
                 #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
                 # TODO ver si es up o down y crear un hilo acorde
                 worker = ClientWorker(
-                    queue.Queue(), client_address, packet.filename, self.logger, packet.is_upload
+                    queue.Queue(),
+                    client_address,
+                    packet.filename,
+                    self.logger,
+                    packet.is_upload,
                 )
                 workers[client_address] = worker
                 workers[client_address].start()

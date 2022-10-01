@@ -1,4 +1,3 @@
-
 class SocketWrapper:
     SOCKET_BUFFER = 4096
 

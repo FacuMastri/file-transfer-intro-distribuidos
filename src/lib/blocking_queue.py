@@ -1,5 +1,6 @@
 class BlockingQueue:
     TIMEOUT = 100000
+
     def __init__(self, queue):
         self.queue = queue
 
