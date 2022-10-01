@@ -3,7 +3,7 @@ import threading
 from lib.packet import Packet
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.blocking_queue import BlockingQueue
-from lib.stop_and_wait_manager import StopAndWaitManager
+from lib.stop_and_wait_manager import StopAndWaitManager, OldPacketReceivedError
 from upload import READ_BUFFER
 
 BUCKET_DIRECTORY = "src/server/files/"
@@ -44,7 +44,8 @@ class ClientWorker(threading.Thread):
                 payload = self.protocol.receive_data()
                 self.logger.info(f"received payload from {self.address}")
                 self.file.write(payload)
-
+            except OldPacketReceivedError:
+                self.logger.info("Old packet received")
             except Exception as e:
                 self.logger.info(e)
                 self.file.close()

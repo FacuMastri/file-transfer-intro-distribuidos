@@ -10,7 +10,7 @@ Open a new terminal and upload a file
 
      python3 src/upload.py -v -H 127.0.0.1 -p 12000 --src src/donald.jpeg --name donald.jpeg
 
-     python3 download.py -v -H 127.0.0.1 -p 12000 --dst src/client/files/ --name donald.jpeg
+     python3 src/download.py -v -H 127.0.0.1 -p 12000 --dst src/client/files/ --name donald.jpeg
 
 
 

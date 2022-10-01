@@ -9,9 +9,13 @@ class AckNotReceivedError(Exception):
     pass
 
 
+class OldPacketReceivedError(Exception):
+    pass
+
+
 class StopAndWaitManager:
     TIMEOUT = 2
-    RETRIES = 3
+    RETRIES = 5
     SOCKET_BUFFER = 1024
 
     def __init__(self, output_socket, input_stream, server_address, logger):
@@ -80,6 +84,7 @@ class StopAndWaitManager:
                 f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
             )
             self.send_ack(self.packet_number - 1)
+            raise OldPacketReceivedError
         else:
             self.send_ack(packet.packet_number)
             self.packet_number += 1

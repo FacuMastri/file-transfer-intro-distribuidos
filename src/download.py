@@ -2,7 +2,7 @@ import logging
 import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_download_args
-from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError
+from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError, OldPacketReceivedError
 from logger import initialize_logger
 from lib.socket_wrapper import SocketWrapper
 
@@ -16,18 +16,21 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
     logger.info("connection established")
 
     payload = 1
-    try:
-        while payload:
+    while payload:
+        try:
             payload = stop_and_wait_manager.receive_data()
             logger.info(f"received payload from {server_address}")
             file.write(payload)
-        file.close()
-        logger.info(f"Download complete for file: {filename}!")
-    except Exception as e:
-        logger.info(e)
-        file.close()
-        os.remove(file.name)
-        logger.info("exception ocurred, incomplete file removes")
+        except OldPacketReceivedError:
+            logger.info("Old packet received, ignoring")
+        except Exception as e:
+            logger.info(e)
+            file.close()
+            os.remove(file.name)
+            logger.info("exception ocurred, incomplete file removes")
+            exit(-1)
+    file.close()
+    logger.info(f"Download complete for file: {filename}!")
 
 
 if __name__ == "__main__":
