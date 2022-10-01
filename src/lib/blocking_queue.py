@@ -1,6 +1,5 @@
-
-class SocketWrapper:
-    TIMEOUT = 3
+class BlockingQueue:
+    TIMEOUT = 100000
     def __init__(self, queue):
         self.queue = queue
 

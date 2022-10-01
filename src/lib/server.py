@@ -24,21 +24,27 @@ class Server:
         self.logger.info(f"FTP server up in port {(self.host, self.port)}")
         # TODO cola de mensajes para manejar multiples clientes
         worker = True
+        worker_q = True
         while True:
             data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
             self.logger.info(f"Received message from {client_address}")
             packet = Packet.from_bytes(data)
             if packet.is_syn():
                 #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
+
+                worker_q = queue.Queue()
                 worker = ClientWorker(
-                    queue.Queue(), client_address, packet.filename, self.logger
+                    worker_q, client_address, packet.filename, self.logger
                 )
                 self.logger.info(f"Created new worker with filename {packet.filename}")
                 # TODO worker.iniciar_comunicacion
             else:
                 # worker.put(packet)
                 self.logger.info(f"gave packet to {client_address}")
-                worker.receive_packet(packet)
+                worker_q.put((data, client_address))
+                self.logger.info(f"puted packet")
+
+                worker.receive_packet()
             # vuelve al loop
 
     def _create_socket(self):

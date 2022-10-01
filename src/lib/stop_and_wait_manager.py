@@ -72,21 +72,21 @@ class StopAndWaitManager:
                 f"Comunication with {self.server_address} finished."
             )
             self.send_ack(0)
-            return True
-
+            return packet.payload
+        # TODO ver si se puede mejorar el return este ^
         if packet.packet_number != self.packet_number:
             self.logger.debug(
                 f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
             )
-            self.send_ack(self, self.packet_number - 1)
+            self.send_ack(self.packet_number - 1)
         else:
-            # file.write(packet.payload)
+            self.send_ack(packet.packet_number)
             self.packet_number += 1
-            self.send_ack(self, packet.packet_number)
+
         return packet.payload
 
     def send_ack(self, packet_number):
-        self.logger.debug(f"Sending ACK number {packet_number} to server")
+        self.logger.debug(f"Sending ACK number {packet_number} to {self.server_address}")
         self.output_socket.sendto(
             Packet.ack_packet(packet_number).to_bytes(), self.server_address
         )
