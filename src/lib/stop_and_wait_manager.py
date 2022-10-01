@@ -30,9 +30,7 @@ class StopAndWaitManager:
         self._send_packet(packet_to_be_sent)
 
     def start_download_connection(self, filename):
-        packet_to_be_sent = Packet(
-            0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8")
-        )
+        packet_to_be_sent = Packet(0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8"))
         self._send_packet(packet_to_be_sent)
 
     def finish_upload_connection(self, filename):
@@ -69,7 +67,7 @@ class StopAndWaitManager:
     def receive_data(self, file):
         data = self.socket.recvfrom(self.SOCKET_BUFFER)[0]
         packet = Packet.from_bytes(data)
-        
+
         if packet.is_finished():
             self.send_ack(self, 0)
             return True
@@ -87,7 +85,9 @@ class StopAndWaitManager:
 
     def send_ack(self, packet_number):
         self.logger.debug(f"Sending ACK number {packet_number} to server")
-        self.socket.sendto(Packet.ack_packet(packet_number).to_bytes(), self.server_address)
+        self.socket.sendto(
+            Packet.ack_packet(packet_number).to_bytes(), self.server_address
+        )
 
     def receive_ack(self):
 

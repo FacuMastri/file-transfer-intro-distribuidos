@@ -5,6 +5,7 @@ from lib.parser import parse_upload_args
 from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError
 from logger import initialize_logger
 
+
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
     logger.info(f"Downloading {filename} from FTP server to {filepath}")
 
@@ -13,7 +14,7 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
     file = open(f"%s{filename}" % filepath, "wb")
     stop_and_wait_manager.start_download_connection(filename)
     logger.info("connection established")
-    
+
     finished = False
     try:
         while not finished:
@@ -25,6 +26,7 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
         file.close()
         os.remove(file.name)
         logger.info("exception ocurred, incomplete file removes")
+
 
 if __name__ == "__main__":
     args = parse_upload_args()
