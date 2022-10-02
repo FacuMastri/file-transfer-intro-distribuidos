@@ -1,8 +1,7 @@
 import argparse
 import logging
 
-DEFAULT_SERVER_PORT = 12000
-DEFAULT_SERVER_ADDRESS = "127.0.0.1"
+from lib.constants import DEFAULT_SERVER_PORT, DEFAULT_SERVER_ADDRESS
 
 
 def make_parser(description):
