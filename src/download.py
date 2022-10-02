@@ -36,14 +36,14 @@ def download_file(
             file.write(payload)
         except OldPacketReceivedError:
             logger.info("Old packet received, ignoring")
-        except Exception as e:
-            logger.info(e)
+        except MaximumRetriesReachedError as e:
+            logger.debug(e)
             file.close()
             os.remove(file.name)
-            logger.info("Exception occurred, incomplete file removed")
+            logger.info(f"Exception occurred: {e}, incomplete file removed")
             exit(-1)
     file.close()
-    logger.info(f"Download complete for file: {filename}!")
+    logger.info(f"Download completed for file: {filename}!")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+import queue
+import socket
+
 from lib.constants import RETRIES
 from lib.exceptions import (
     MaximumRetriesReachedError,
@@ -14,10 +17,10 @@ class StopAndWaitUploaderManager(ProtocolManager):
 
     def start_upload_connection(self, filename, filesize: int):
         # Sending filesize as payload
-        packet_to_be_sent = Packet(
+        packet = Packet(
             0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8")
         )
-        self._send_packet(packet_to_be_sent)
+        self._send_packet(packet)
 
     def upload_data(self, data, filename):
         packet = Packet(self.packet_number, 1, 0, 0, 0, 0, 0, filename, data)
@@ -34,15 +37,15 @@ class StopAndWaitDownloaderManager(ProtocolManager):
         self._send_packet(packet_to_be_sent)
 
     def download_data(self):
-        rcv_count = 0
-        while rcv_count < RETRIES + 1:
+        receive_count = 0
+        while receive_count < RETRIES + 1:
             try:
                 data, _address = self.input_stream.receive()
                 break
-            except Exception as _e:
+            except (socket.timeout, queue.Empty) as _e:
                 self.logger.error("Timeout event occurred on recv")
-                rcv_count += 1
-                if rcv_count == RETRIES + 1:
+                receive_count += 1
+                if receive_count == RETRIES + 1:
                     raise MaximumRetriesReachedError
 
         packet = Packet.from_bytes(data)

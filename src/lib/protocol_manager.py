@@ -1,3 +1,5 @@
+import socket
+
 from lib.constants import TIMEOUT, RETRIES
 from lib.exceptions import MaximumRetriesReachedError
 from lib.packet import Packet
@@ -8,7 +10,6 @@ class ProtocolManager:
         self.output_socket = output_socket
         self.input_stream = input_stream
         self.output_socket.settimeout(TIMEOUT)
-        # entidad de entrada que encapsula a la cola bloqueante y al socket. si es un socker hace recv, si es una cola hace get(true, timeout)
         self.server_address = server_address
         self.logger = logger
         self.packet_number = 0
@@ -19,7 +20,7 @@ class ProtocolManager:
         self.packet_number = 0
         try:
             self._send_packet(packet_to_be_sent)
-        except Exception as _e:
+        except MaximumRetriesReachedError as _e:
             self.logger.info("Last ACK was lost, assuming connection finished.")
 
     def _send_packet(self, packet):
@@ -28,11 +29,11 @@ class ProtocolManager:
         while send_count < RETRIES:
             try:
                 self.output_socket.sendto(packet.to_bytes(), self.server_address)
-                self.logger.info(f"Packet sent with ({packet})")
+                self.logger.info(f"Packet sent as ({packet})")
                 self._receive_ack()
                 return
-            except Exception as _e:
-                self.logger.error("Timeout event occurred on send")
+            except (MaximumRetriesReachedError, socket.timeout) as _e:
+                self.logger.error("Timeout event occurred on send. Retrying...")
                 send_count += 1
 
         self.logger.error(f"Timeout limit reached. Retried {send_count} times. Exiting")
@@ -48,15 +49,15 @@ class ProtocolManager:
         )
 
     def _receive_ack(self):
-        rcv_count = 0
-        while rcv_count < RETRIES + 1:
+        receive_count = 0
+        while receive_count < RETRIES + 1:
             data, _address = self.input_stream.receive()
             packet = Packet.from_bytes(data)
             if packet.packet_number < self.packet_number:
                 self.logger.debug(
                     f"Packet number does not match: recv:{packet.packet_number}, own:{self.packet_number}"
                 )
-                rcv_count += 1
+                receive_count += 1
             else:
                 self.logger.info(
                     f"ACK received: {packet.is_ack()} for packet {packet.packet_number}"

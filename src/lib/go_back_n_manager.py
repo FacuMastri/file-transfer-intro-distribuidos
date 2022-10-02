@@ -35,13 +35,12 @@ class GoBackNManager(ProtocolManager):
     def finish_connection(self, filename):
         while self._wait_for_ack():
             pass
-        # super().finish_connection(filename)
         # Sending filesize as payload
         packet_to_be_sent = Packet(0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8"))
         self.packet_number = 0
         try:
             super()._send_packet(packet_to_be_sent)
-        except Exception as _e:
+        except MaximumRetriesReachedError:
             self.logger.info("Last ACK was lost, assuming connection finished.")
 
     def upload_data(self, data, filename):
@@ -102,7 +101,7 @@ class GoBackNManager(ProtocolManager):
             try:
                 data, _address = self.input_stream.receive()
                 break
-            except Exception as _e:
+            except (socket.timeout, queue.Empty) as _e:
                 self.logger.error("Timeout event occurred on recv")
                 if rcv_count == RETRIES + 1:
                     raise MaximumRetriesReachedError

@@ -2,6 +2,7 @@ import os
 import threading
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.blocking_queue import BlockingQueue
+from lib.exceptions import MaximumRetriesReachedError
 from lib.stop_and_wait_manager import (
     StopAndWaitDownloaderManager,
     StopAndWaitUploaderManager,
@@ -52,11 +53,10 @@ class ClientWorker(threading.Thread):
                 self.file.write(payload)
             except OldPacketReceivedError:
                 self.logger.info("Old packet received")
-            except Exception as e:
-                self.logger.info(e)
+            except MaximumRetriesReachedError as e:
                 self.file.close()
                 os.remove(self.file_name)  # TODO recibir ruta completa
-                self.logger.info("Exception occurred, incomplete file removed")
+                self.logger.info(f"Exception occurred: {e}, incomplete file removed")
 
         self.logger.info("Upload complete!")
         self.file.close()
