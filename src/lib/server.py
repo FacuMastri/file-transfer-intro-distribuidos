@@ -29,7 +29,7 @@ class Server:
             self.logger.info(f"Received message from {client_address}")
             packet = Packet.from_bytes(data)
             if packet.is_syn():
-                #  TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
+                # TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
                 # TODO ver si es up o down y crear un hilo acorde
                 worker = ClientWorker(
                     queue.Queue(),

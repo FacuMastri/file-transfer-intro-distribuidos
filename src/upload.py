@@ -17,6 +17,7 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
     if not os.path.isfile(filepath):
         logger.error(f"File {filepath} does not exist")
         return
+
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
     input_socket = SocketWrapper(socket)
     stop_and_wait_manager = StopAndWaitManager(
@@ -24,9 +25,10 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
     )
 
     filesize = os.stat(filepath)
-    logger.info(f"filesize {filesize.st_size}")
+    logger.info(f"Filesize {filesize.st_size}")
     stop_and_wait_manager.start_upload_connection(filename, filesize.st_size)
-    logger.info("connection established")
+    logger.info("Connection established")
+
     with open(filepath, "rb") as file:
         data = file.read(READ_BUFFER)
         while data:

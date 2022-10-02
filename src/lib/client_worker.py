@@ -1,6 +1,5 @@
 import os
 import threading
-from lib.packet import Packet
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.blocking_queue import BlockingQueue
 from lib.stop_and_wait_manager import StopAndWaitManager
@@ -43,7 +42,7 @@ class ClientWorker(threading.Thread):
         while payload:
             try:
                 payload = self.protocol.receive_data()
-                self.logger.info(f"received payload from {self.address}")
+                self.logger.info(f"Received payload from {self.address}")
                 self.file.write(payload)
             except OldPacketReceivedError:
                 self.logger.info("Old packet received")
@@ -51,7 +50,7 @@ class ClientWorker(threading.Thread):
                 self.logger.info(e)
                 self.file.close()
                 os.remove(self.file_name)  # TODO recibir ruta completa
-                self.logger.info("exception ocurred, incomplete file removes")
+                self.logger.info("Exception occurred, incomplete file removed")
 
         self.logger.info("Upload complete!")
         self.file.close()

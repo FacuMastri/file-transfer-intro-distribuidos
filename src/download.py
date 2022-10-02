@@ -11,7 +11,7 @@ from lib.socket_wrapper import SocketWrapper
 
 
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
-    logger.info(f"Downloading {filename} from FTP server to {filepath}")
+    logger.info(f"Downloading {filename} from FTP server to {filepath} + {filename}")
     input_socket = SocketWrapper(socket)
     stop_and_wait_manager = StopAndWaitManager(
         socket, input_socket, server_address, logger
@@ -19,13 +19,13 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
 
     stop_and_wait_manager.start_download_connection(filename)
     file = open(f"%s{filename}" % filepath, "wb")
-    logger.info("connection established")
+    logger.info("Connection established")
 
     payload = 1
     while payload:
         try:
             payload = stop_and_wait_manager.receive_data()
-            logger.info(f"received payload from {server_address}")
+            logger.info(f"Received payload from {server_address}")
             file.write(payload)
         except OldPacketReceivedError:
             logger.info("Old packet received, ignoring")
@@ -33,7 +33,7 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
             logger.info(e)
             file.close()
             os.remove(file.name)
-            logger.info("exception ocurred, incomplete file removes")
+            logger.info("Exception occurred, incomplete file removed")
             exit(-1)
     file.close()
     logger.info(f"Download complete for file: {filename}!")

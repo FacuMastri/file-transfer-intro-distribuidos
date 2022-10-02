@@ -1,4 +1,8 @@
-from lib.exceptions import MaximumRetriesReachedError, AckNotReceivedError, OldPacketReceivedError
+from lib.exceptions import (
+    MaximumRetriesReachedError,
+    AckNotReceivedError,
+    OldPacketReceivedError,
+)
 from lib.packet import Packet
 
 
@@ -16,9 +20,10 @@ class StopAndWaitManager:
         self.packet_number = 0
 
     def start_upload_connection(self, filename, filesize: int):
+        # Sending filesize as payload
         packet_to_be_sent = Packet(
             0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8")
-        )  # sending filesize as payload
+        )
         self._send_packet(packet_to_be_sent)
 
     def start_download_connection(self, filename):
@@ -26,9 +31,8 @@ class StopAndWaitManager:
         self._send_packet(packet_to_be_sent)
 
     def finish_connection(self, filename):
-        packet_to_be_sent = Packet(
-            0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
-        )  # sending filesize as payload
+        # Sending filesize as payload
+        packet_to_be_sent = Packet(0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8"))
         self.packet_number = 0
         self._send_packet(packet_to_be_sent)
 
@@ -38,7 +42,7 @@ class StopAndWaitManager:
         self.packet_number += 1
 
     def _send_packet(self, packet):
-        self.logger.debug(f"Sending {packet.size()} bytes to {self.server_address}")
+        self.logger.debug(f"Preparing {packet.size()} bytes to {self.server_address}")
         send_count = 0
         while send_count < self.RETRIES:
             self.output_socket.settimeout(self.TIMEOUT)
@@ -51,15 +55,14 @@ class StopAndWaitManager:
                 self.logger.error("Timeout event occurred")
                 send_count += 1
 
-        self.logger.error("Timeout limit reached. Exiting")
-        self.logger.error(f"Send count: {send_count}")
+        self.logger.error(f"Timeout limit reached. Retried {send_count} times. Exiting")
 
         raise MaximumRetriesReachedError
 
     def receive_data(self):
         data, _address = self.input_stream.receive()
         packet = Packet.from_bytes(data)
-        self.logger.info(f"{packet}")
+        self.logger.info(f"Received packet with {packet}")
         # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(f"Comunication with {self.server_address} finished.")
@@ -93,10 +96,12 @@ class StopAndWaitManager:
 
         if packet.packet_number != self.packet_number:
             self.logger.debug(
-                f"Packet number doesnt match: recv:{packet.packet_number}, own:{self.packet_number}"
+                f"Packet number does not match: recv: {packet.packet_number}, own: {self.packet_number}"
             )
             self.receive_ack()
 
-        self.logger.info(f"ACK received: {packet.is_ack()}")
+        self.logger.info(
+            f"ACK received: {packet.is_ack()} for packet {packet.packet_number}"
+        )
         if not packet.is_ack():
             raise AckNotReceivedError
