@@ -14,6 +14,7 @@ class StopAndWaitManager:
     def __init__(self, output_socket, input_stream, server_address, logger):
         self.output_socket = output_socket
         self.input_stream = input_stream
+        self.output_socket.settimeout(self.TIMEOUT)
         # entidad de entrada que encapsula a la cola bloqueante y al socket. si es un socker hace recv, si es una cola hace get(true, timeout)
         self.server_address = server_address
         self.logger = logger
@@ -30,14 +31,13 @@ class StopAndWaitManager:
         self.logger.debug(f"Preparing {packet.size()} bytes to {self.server_address}")
         send_count = 0
         while send_count < self.RETRIES:
-            self.input_stream.settimeout(self.TIMEOUT)
             try:
                 self.output_socket.sendto(packet.to_bytes(), self.server_address)
                 self.logger.info(f"Packet sent with ({packet})")
                 self.receive_ack()
                 return
             except Exception as _e:
-                self.logger.error("Timeout event occurred")
+                self.logger.error("Timeout event occurred on send")
                 send_count += 1
 
         self.logger.error(f"Timeout limit reached. Retried {send_count} times. Exiting")
@@ -91,14 +91,13 @@ class StopAndWaitDownloaderManager(StopAndWaitManager):
         self._send_packet(packet_to_be_sent)
 
     def download_data(self):
-        self.input_stream.settimeout(self.TIMEOUT)
         rcv_count = 0
         while rcv_count < self.RETRIES + 1:
             try:
                 data, _address = self.input_stream.receive()
                 break
             except Exception as _e:
-
+                self.logger.error("Timeout event occurred on recv")
                 if rcv_count == self.RETRIES + 1:
                     raise MaximumRetriesReachedError
 

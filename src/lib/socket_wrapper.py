@@ -6,6 +6,3 @@ class SocketWrapper:
 
     def receive(self):
         return self.socket.recvfrom(self.SOCKET_BUFFER)
-
-    def settimeout(self, timeout):
-        self.socket.settimeout(timeout)
