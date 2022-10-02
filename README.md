@@ -10,11 +10,10 @@ Open a new terminal and upload a file
 
      python3 src/upload.py -v -H 127.0.0.1 -p 12000 --src src/donald.jpeg --name donald.jpeg
 
+Open a new terminal and download a file
+
      python3 src/download.py -v -H 127.0.0.1 -p 12000 --dst src/client/files/ --name donald.jpeg
 
-
-
-Then check new file in `server/files/donald.jpeg`
 
 ## Test with packet loss
 

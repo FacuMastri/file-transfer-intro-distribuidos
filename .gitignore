@@ -13,6 +13,7 @@ venv/
 
 # Bucket files
 src/server/files
+src/client/files
 
 src/__init__.pyc
 src/lib/__init__.pyc

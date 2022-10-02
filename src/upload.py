@@ -16,6 +16,7 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
     if not os.path.isfile(filepath):
         logger.error(f"File {filepath} does not exist")
         return
+
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
     input_socket = SocketWrapper(socket)
     uploader = StopAndWaitUploaderManager(socket, input_socket, server_address, logger)
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     args = parse_upload_args()
     client_socket = socket(AF_INET, SOCK_DGRAM)
     server_address = (args.host, int(args.port))
-    logger = initialize_logger(args, server_address)
+    logger = initialize_logger(args, server_address, "upload")
 
     try:
         upload_file(client_socket, args.name, args.src, logger)

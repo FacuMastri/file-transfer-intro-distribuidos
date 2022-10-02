@@ -1,6 +1,5 @@
 import os
 import threading
-from lib.packet import Packet
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.blocking_queue import BlockingQueue
 from lib.stop_and_wait_manager import StopAndWaitDownloaderManager, StopAndWaitUploaderManager, OldPacketReceivedError
@@ -27,7 +26,6 @@ class ClientWorker(threading.Thread):
             if is_upload else StopAndWaitUploaderManager(output_socket, input_stream, client_address, logger)
         threading.Thread.__init__(self)
 
-
     def run(self):
         if self.is_upload:
             self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "wb")
@@ -51,8 +49,8 @@ class ClientWorker(threading.Thread):
             except Exception as e:
                 self.logger.info(e)
                 self.file.close()
-                os.remove(self.file_name) # TODO recibir ruta completa
-                self.logger.info("exception ocurred, incomplete file removes")
+                os.remove(self.file_name)  # TODO recibir ruta completa
+                self.logger.info("Exception occurred, incomplete file removed")
 
         self.logger.info("Upload complete!")
         self.file.close()

@@ -6,14 +6,15 @@ from lib.stop_and_wait_manager import StopAndWaitDownloaderManager, MaximumRetri
 from logger import initialize_logger
 from lib.socket_wrapper import SocketWrapper
 
+
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
-    logger.info(f"Downloading {filename} from FTP server to {filepath}")
+    logger.info(f"Downloading {filename} from FTP server to {filepath} + {filename}")
     input_socket = SocketWrapper(socket)
     downloader = StopAndWaitDownloaderManager(socket, input_socket, server_address, logger)
 
     downloader.start_download_connection(filename)
     file = open(f"%s{filename}" % filepath, "wb")
-    logger.info("connection established")
+    logger.info("Connection established")
 
     payload = 1
     while payload:
@@ -27,7 +28,7 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
             logger.info(e)
             file.close()
             os.remove(file.name)
-            logger.info("exception ocurred, incomplete file removes")
+            logger.info("Exception occurred, incomplete file removed")
             exit(-1)
     file.close()
     logger.info(f"Download complete for file: {filename}!")
@@ -37,7 +38,7 @@ if __name__ == "__main__":
     args = parse_download_args()
     client_socket = socket(AF_INET, SOCK_DGRAM)
     server_address = (args.host, int(args.port))
-    logger = initialize_logger(args, server_address)
+    logger = initialize_logger(args, server_address, "download")
 
     try:
         download_file(client_socket, args.name, args.dst, logger)

@@ -36,6 +36,7 @@ def parse_upload_args():
 
     return get_upload_args(parser.parse_args())
 
+
 def get_upload_args(args):
     if args.verbose and args.quiet:
         raise Exception("Verbose and quiet options are not compatible")
@@ -53,6 +54,7 @@ def get_upload_args(args):
 
     return args
 
+
 def parse_download_args():
     parser = make_parser("FTP client - flags for upload command")
     parser.add_argument("-d", "--dst", metavar="filepath", help="destination file path")
@@ -61,6 +63,7 @@ def parse_download_args():
     )
 
     return get_download_args(parser.parse_args())
+
 
 def get_download_args(args):
     if args.verbose and args.quiet:
@@ -78,6 +81,7 @@ def get_download_args(args):
     args.debug_level = debug_level
 
     return args
+
 
 def get_server_args(args):
     if args.verbose and args.quiet:

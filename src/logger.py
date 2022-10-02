@@ -4,11 +4,14 @@ READ_BUFFER = 1024
 # Green
 COLOR_UPLOAD = "\033[0;32m"
 END_COLOR = "\033[0m"
+# Blue
+COLOR_DOWNLOAD = "\033[0;34m"
 
 
-def initialize_logger(args, server_address):
+def initialize_logger(args, server_address, action):
+    color = COLOR_UPLOAD if action == "upload" else COLOR_DOWNLOAD
     logging.basicConfig(
-        format=f"[%(asctime)s] - [{COLOR_UPLOAD}upload{END_COLOR} %(levelname)s] - %(message)s",
+        format=f"[%(asctime)s] - [{color}{action}{END_COLOR} %(levelname)s] - %(message)s",
         level=args.debug_level,
         datefmt="%Y/%m/%d %H:%M:%S",
     )
