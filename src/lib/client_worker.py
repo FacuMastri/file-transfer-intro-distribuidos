@@ -18,7 +18,9 @@ class ClientWorker(threading.Thread):
     TIMEOUT = 3
     READ_BUFFER = 1024
 
-    def __init__(self, blocking_queue, client_address, file_name, logger, is_upload, protocol):
+    def __init__(
+        self, blocking_queue, client_address, file_name, logger, is_upload, protocol
+    ):
         self.file = None
         self.packet_number = 0
         self.is_upload = is_upload
@@ -28,7 +30,9 @@ class ClientWorker(threading.Thread):
         self.blocking_queue = blocking_queue
         output_socket = socket(AF_INET, SOCK_DGRAM)
         input_stream = BlockingQueue(blocking_queue)
-        self.protocol = self._select_protocol(is_upload, protocol, output_socket, input_stream)
+        self.protocol = self._select_protocol(
+            is_upload, protocol, output_socket, input_stream
+        )
         threading.Thread.__init__(self)
 
     def run(self):
@@ -43,7 +47,6 @@ class ClientWorker(threading.Thread):
                 self.upload_file()
         except:
             self.logger.error("Unexpected exception caught, exiting thread")
-
 
     def download_file(self):
         payload = 1
@@ -77,12 +80,19 @@ class ClientWorker(threading.Thread):
     def _select_protocol(self, is_upload, protocol, output_socket, input_stream):
         if protocol == SAW_PROTOCOL:
             if not is_upload:
-                return StopAndWaitUploaderManager(output_socket, input_stream, self.address, self.logger)
+                return StopAndWaitUploaderManager(
+                    output_socket, input_stream, self.address, self.logger
+                )
             else:
-                return StopAndWaitDownloaderManager(output_socket, input_stream, self.address, self.logger)
+                return StopAndWaitDownloaderManager(
+                    output_socket, input_stream, self.address, self.logger
+                )
         else:
             if is_upload:
-                return GoBackNManager(output_socket, input_stream, self.address, self.logger)
+                return GoBackNManager(
+                    output_socket, input_stream, self.address, self.logger
+                )
             else:
-                return GoBackNManager(output_socket, input_stream, self.address, self.logger)
-
+                return GoBackNManager(
+                    output_socket, input_stream, self.address, self.logger
+                )

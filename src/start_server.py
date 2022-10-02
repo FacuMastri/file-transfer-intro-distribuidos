@@ -16,6 +16,7 @@ if __name__ == "__main__":
         datefmt="%Y/%m/%d %H:%M:%S",
     )
     logging.debug(f"Setting {logging.getLevelName(args.debug_level)} log level")
+    logging.info(f"Protocol: {args.prot}")
     logger = logging.getLogger(__name__)
 
     server = Server(args.host, int(args.port), logger)

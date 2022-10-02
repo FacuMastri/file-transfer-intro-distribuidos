@@ -5,6 +5,7 @@ from lib.exceptions import (
 )
 from lib.packet import Packet
 
+
 class ProtocolManager:
     TIMEOUT = 2
     RETRIES = 5
@@ -69,5 +70,3 @@ class ProtocolManager:
                 )
                 return packet
         raise MaximumRetriesReachedError
-
-

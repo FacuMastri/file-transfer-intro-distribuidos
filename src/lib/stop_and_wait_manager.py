@@ -6,6 +6,7 @@ from lib.exceptions import (
 from lib.packet import Packet
 from lib.protocol_manager import ProtocolManager
 
+
 class StopAndWaitUploaderManager(ProtocolManager):
     def __init__(self, output_socket, input_stream, server_address, logger):
         super().__init__(output_socket, input_stream, server_address, logger)

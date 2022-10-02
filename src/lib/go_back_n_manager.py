@@ -1,6 +1,10 @@
 from socket import socket
 import queue
-from lib.exceptions import AckNotReceivedError, MaximumRetriesReachedError, OldPacketReceivedError
+from lib.exceptions import (
+    AckNotReceivedError,
+    MaximumRetriesReachedError,
+    OldPacketReceivedError,
+)
 from lib.packet import Packet
 from lib.protocol_manager import ProtocolManager
 
@@ -24,15 +28,31 @@ class GoBackNManager(ProtocolManager):
         )
         self._send_packet(packet_to_be_sent)
 
+    def finish_connection(self, filename):
+        while self._wait_for_ack():
+            pass
+        # super().finish_connection(filename)
+        # Sending filesize as payload
+        packet_to_be_sent = Packet(0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8"))
+        self.packet_number = 0
+        try:
+            super()._send_packet(packet_to_be_sent)
+        except Exception as _e:
+            self.logger.info("Last ACK was lost, assuming connection finished.")
+
     def upload_data(self, data, filename):
         # Si hay lugar en la window, mandar el paquete
-        packet = Packet(self.packet_number, 1, 0, 0, 0, 0, 0, filename, data)
+        packet_number = 0
+        if not self.in_flight:
+            packet_number = 0
+        else:
+            packet_number = self.in_flight[-1].packet_number + 1
+        self.logger.debug(f"Packet number to be sent: {packet_number}")
+        packet = Packet(packet_number, 1, 0, 0, 0, 0, 0, filename, data)
         if len(self.in_flight) < self.WINDOW_SIZE:
             self._send_packet(packet)
-            self.packet_number += 1
-            self.logger.info(f"packet sent: {packet}")
             self.in_flight.append(packet)
-            return 
+            return
 
         # Receive ACKs, tal vez sin la necesidad de bloquear?
         try:
@@ -42,17 +62,15 @@ class GoBackNManager(ProtocolManager):
             pass
 
         self._send_packet(packet)
-        self.packet_number += 1
-        self.logger.info(f"packet sent: {packet}")
         self.in_flight.append(packet)
 
-
     def _process_ack(self, ack_packet):
-        # Limpiamos de la posicion 0 a la posicion del ack, es decir, nos quedamos con los que no han sido acked
-        # Puedo recibir otro paquete que no sea un ACK en esta situacion?
-        for i in range(len(self.in_flight)):
-            if self.in_flight[i].packet_number == ack_packet.packet_number:
-                self.in_flight = self.in_flight[i + 1 :]
+        packet_received = ack_packet.packet_number - self.in_flight[0].packet_number
+        if packet_received == 0:
+            self.in_flight.pop(0)
+        for i in range(packet_received):
+            self.in_flight.pop(0)
+        self.packet_number = self.in_flight[0].packet_number
 
     def _wait_for_ack(self):
         retries = 0
@@ -60,13 +78,16 @@ class GoBackNManager(ProtocolManager):
             try:
                 ack_packet = self._receive_ack()
                 self._process_ack(ack_packet)
-                return
+                if not self.in_flight:
+                    self.logger.info("Window is empty, returning")
+                    return False
+                return True
             except Exception as _e:
-                #TODO ver lo de las excepciones de los objetos
+                # TODO ver lo de las excepciones de los objetos
                 # Si la lista está vacia, no hay nada que reenviar
                 if not self.in_flight:
-                    self.logger.info(f"window is empty, returning")
-                    return
+                    self.logger.info("Window is empty, returning")
+                    return False
                 self.logger.debug(
                     f"Timeout. Resending packets from {self.in_flight[0].packet_number}"
                 )

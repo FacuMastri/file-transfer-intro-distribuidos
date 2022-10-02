@@ -35,7 +35,7 @@ class Server:
                     packet.filename,
                     self.logger,
                     packet.is_upload,
-                    protocol
+                    protocol,
                 )
                 workers[client_address] = worker
                 workers[client_address].start()
