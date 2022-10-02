@@ -7,7 +7,7 @@ from lib.stop_and_wait_manager import (
     StopAndWaitUploaderManager,
     MaximumRetriesReachedError,
 )
-from logger import initialize_logger
+from lib.logger import initialize_logger
 
 READ_BUFFER = 1024
 # Green

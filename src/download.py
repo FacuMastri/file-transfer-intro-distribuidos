@@ -7,7 +7,7 @@ from lib.stop_and_wait_manager import (
     MaximumRetriesReachedError,
     OldPacketReceivedError,
 )
-from logger import initialize_logger
+from lib.logger import initialize_logger
 from lib.socket_wrapper import SocketWrapper
 
 
