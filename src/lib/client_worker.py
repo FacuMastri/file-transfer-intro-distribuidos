@@ -2,8 +2,11 @@ import os
 import threading
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.blocking_queue import BlockingQueue
-from lib.stop_and_wait_manager import StopAndWaitManager
-from lib.exceptions import OldPacketReceivedError
+from lib.stop_and_wait_manager import (
+    StopAndWaitDownloaderManager,
+    StopAndWaitUploaderManager,
+    OldPacketReceivedError,
+)
 from upload import READ_BUFFER
 
 BUCKET_DIRECTORY = "src/server/files/"
@@ -14,6 +17,7 @@ class ClientWorker(threading.Thread):
     READ_BUFFER = 1024
 
     def __init__(self, blocking_queue, client_address, file_name, logger, is_upload):
+        self.file = None
         self.packet_number = 0
         self.is_upload = is_upload
         self.address = client_address
@@ -22,8 +26,14 @@ class ClientWorker(threading.Thread):
         self.blocking_queue = blocking_queue
         output_socket = socket(AF_INET, SOCK_DGRAM)
         input_stream = BlockingQueue(blocking_queue)
-        self.protocol = StopAndWaitManager(
-            output_socket, input_stream, client_address, logger
+        self.protocol = (
+            StopAndWaitDownloaderManager(
+                output_socket, input_stream, client_address, logger
+            )
+            if is_upload
+            else StopAndWaitUploaderManager(
+                output_socket, input_stream, client_address, logger
+            )
         )
         threading.Thread.__init__(self)
 
@@ -31,18 +41,17 @@ class ClientWorker(threading.Thread):
         if self.is_upload:
             self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "wb")
             self.protocol.send_ack(0)
-            self.receive_packet()
+            self.download_file()
         else:
             self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "rb")
             self.protocol.send_ack(0)
-            self.send_packet()
+            self.upload_file()
 
-    def receive_packet(self):
+    def download_file(self):
         payload = 1
         while payload:
             try:
-                payload = self.protocol.receive_data()
-                self.logger.info(f"Received payload from {self.address}")
+                payload = self.protocol.download_data()
                 self.file.write(payload)
             except OldPacketReceivedError:
                 self.logger.info("Old packet received")
@@ -55,10 +64,10 @@ class ClientWorker(threading.Thread):
         self.logger.info("Upload complete!")
         self.file.close()
 
-    def send_packet(self):
+    def upload_file(self):
         data = self.file.read(READ_BUFFER)
         while data:
-            self.protocol.send_data(data, self.file_name)
+            self.protocol.upload_data(data, self.file_name)
             data = self.file.read(READ_BUFFER)
 
         self.protocol.finish_connection(self.file_name)

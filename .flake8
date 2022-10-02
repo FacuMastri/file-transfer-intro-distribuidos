@@ -18,6 +18,7 @@ ignore =
     W0703, # Catching too general exception Exception (broad-except)
     E712, # comparison to True should be 'if cond is True:' or 'if cond:'
     E711 # comparison to None should be 'if cond is not None:'
+    F841 # local variable is assigned to but never used
 select =
     C, # McCabe complexity
     E, # pep8 errors

@@ -42,7 +42,6 @@ class Server:
                 workers[client_address].start()
                 self.logger.info(f"Created new worker with filename {packet.filename}")
             else:
-                self.logger.info(f"gave packet to {client_address}")
                 # TODO ver lo del get
                 workers[client_address].put((data, client_address))
 

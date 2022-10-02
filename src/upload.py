@@ -3,8 +3,10 @@ import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_upload_args
 from lib.socket_wrapper import SocketWrapper
-from lib.stop_and_wait_manager import StopAndWaitManager
-from lib.exceptions import MaximumRetriesReachedError
+from lib.stop_and_wait_manager import (
+    StopAndWaitUploaderManager,
+    MaximumRetriesReachedError,
+)
 from logger import initialize_logger
 
 READ_BUFFER = 1024
@@ -20,22 +22,19 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
 
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
     input_socket = SocketWrapper(socket)
-    stop_and_wait_manager = StopAndWaitManager(
-        socket, input_socket, server_address, logger
-    )
+    uploader = StopAndWaitUploaderManager(socket, input_socket, server_address, logger)
 
     filesize = os.stat(filepath)
-    logger.info(f"Filesize {filesize.st_size}")
-    stop_and_wait_manager.start_upload_connection(filename, filesize.st_size)
+    logger.info(f"filesize {filesize.st_size}")
+    uploader.start_upload_connection(filename, filesize.st_size)
     logger.info("Connection established")
-
     with open(filepath, "rb") as file:
         data = file.read(READ_BUFFER)
         while data:
-            stop_and_wait_manager.send_data(data, filename)
+            uploader.upload_data(data, filename)
             data = file.read(READ_BUFFER)
 
-    stop_and_wait_manager.finish_connection(filename)
+    uploader.finish_connection(filename)
     logger.info("Upload complete!")
 
 

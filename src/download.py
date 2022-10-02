@@ -3,9 +3,10 @@ import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_download_args
 from lib.stop_and_wait_manager import (
-    StopAndWaitManager,
+    StopAndWaitDownloaderManager,
+    MaximumRetriesReachedError,
+    OldPacketReceivedError,
 )
-from lib.exceptions import MaximumRetriesReachedError, OldPacketReceivedError
 from logger import initialize_logger
 from lib.socket_wrapper import SocketWrapper
 
@@ -13,18 +14,18 @@ from lib.socket_wrapper import SocketWrapper
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
     logger.info(f"Downloading {filename} from FTP server to {filepath} + {filename}")
     input_socket = SocketWrapper(socket)
-    stop_and_wait_manager = StopAndWaitManager(
+    downloader = StopAndWaitDownloaderManager(
         socket, input_socket, server_address, logger
     )
 
-    stop_and_wait_manager.start_download_connection(filename)
+    downloader.start_download_connection(filename)
     file = open(f"%s{filename}" % filepath, "wb")
     logger.info("Connection established")
 
     payload = 1
     while payload:
         try:
-            payload = stop_and_wait_manager.receive_data()
+            payload = downloader.download_data()
             file.write(payload)
         except OldPacketReceivedError:
             logger.info("Old packet received, ignoring")
