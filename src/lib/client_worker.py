@@ -52,7 +52,6 @@ class ClientWorker(threading.Thread):
         while payload:
             try:
                 payload = self.protocol.download_data()
-                self.logger.info(f"received payload from {self.address}")
                 self.file.write(payload)
             except OldPacketReceivedError:
                 self.logger.info("Old packet received")
