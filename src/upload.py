@@ -18,19 +18,19 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
         return
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
     input_socket = SocketWrapper(socket)
-    stop_and_wait_manager = StopAndWaitUploaderManager(socket, input_socket, server_address, logger)
+    uploader = StopAndWaitUploaderManager(socket, input_socket, server_address, logger)
 
     filesize = os.stat(filepath)
     logger.info(f"filesize {filesize.st_size}")
-    stop_and_wait_manager.start_upload_connection(filename, filesize.st_size)
+    uploader.start_upload_connection(filename, filesize.st_size)
     logger.info("connection established")
     with open(filepath, "rb") as file:
         data = file.read(READ_BUFFER)
         while data:
-            stop_and_wait_manager.send_data(data, filename)
+            uploader.upload_data(data, filename)
             data = file.read(READ_BUFFER)
 
-    stop_and_wait_manager.finish_connection(filename)
+    uploader.finish_connection(filename)
     logger.info("Upload complete!")
 
 

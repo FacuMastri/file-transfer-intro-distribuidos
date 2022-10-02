@@ -9,16 +9,16 @@ from lib.socket_wrapper import SocketWrapper
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
     logger.info(f"Downloading {filename} from FTP server to {filepath}")
     input_socket = SocketWrapper(socket)
-    stop_and_wait_manager = StopAndWaitDownloaderManager(socket, input_socket, server_address, logger)
+    downloader = StopAndWaitDownloaderManager(socket, input_socket, server_address, logger)
 
-    stop_and_wait_manager.start_download_connection(filename)
+    downloader.start_download_connection(filename)
     file = open(f"%s{filename}" % filepath, "wb")
     logger.info("connection established")
 
     payload = 1
     while payload:
         try:
-            payload = stop_and_wait_manager.receive_data()
+            payload = downloader.receive_data()
             logger.info(f"received payload from {server_address}")
             file.write(payload)
         except OldPacketReceivedError:

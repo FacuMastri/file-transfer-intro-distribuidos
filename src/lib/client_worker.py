@@ -31,14 +31,14 @@ class ClientWorker(threading.Thread):
         if self.is_upload:
             self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "wb")
             self.protocol.send_ack(0)
-            self.receive_packet()
+            self.download_file()
         else:
             self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "rb")
             self.protocol.send_ack(0)
-            self.send_packet()
+            self.upload_file()
 
 
-    def receive_packet(self):
+    def download_file(self):
         payload = 1
         while payload:
             try:
@@ -56,10 +56,10 @@ class ClientWorker(threading.Thread):
         self.logger.info("Upload complete!")
         self.file.close()
 
-    def send_packet(self):
+    def upload_file(self):
         data = self.file.read(READ_BUFFER)
         while data:
-            self.protocol.send_data(data, self.file_name)
+            self.protocol.upload_data(data, self.file_name)
             data = self.file.read(READ_BUFFER)
 
         self.protocol.finish_connection(self.file_name)

@@ -84,7 +84,7 @@ class StopAndWaitUploaderManager(StopAndWaitManager):
         )  # sending filesize as payload
         self._send_packet(packet_to_be_sent)
 
-    def send_data(self, data, filename):
+    def upload_data(self, data, filename):
         packet_to_be_sent = Packet(self.packet_number, 1, 0, 0, 0, 0, 0, filename, data)
         self._send_packet(packet_to_be_sent)
         self.packet_number += 1
