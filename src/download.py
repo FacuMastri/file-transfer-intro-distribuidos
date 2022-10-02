@@ -43,7 +43,7 @@ if __name__ == "__main__":
     args = parse_download_args()
     client_socket = socket(AF_INET, SOCK_DGRAM)
     server_address = (args.host, int(args.port))
-    logger = initialize_logger(args, server_address)
+    logger = initialize_logger(args, server_address, "download")
 
     try:
         download_file(client_socket, args.name, args.dst, logger)
