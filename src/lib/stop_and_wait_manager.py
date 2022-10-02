@@ -37,13 +37,13 @@ class StopAndWaitManager:
         self.logger.debug(f"Sending {packet.size()} bytes to {self.server_address}")
         send_count = 0
         while send_count < self.RETRIES:
-            self.output_socket.settimeout(self.TIMEOUT)
+            self.input_stream.settimeout(self.TIMEOUT)
             try:
                 self.output_socket.sendto(packet.to_bytes(), self.server_address)
                 self.logger.info(f"Packet sent with ({packet})")
                 self.receive_ack()
                 return
-            except:
+            except Exception as _e:
                 self.logger.error("Timeout event occurred")
                 send_count += 1
 
@@ -98,8 +98,18 @@ class StopAndWaitDownloaderManager(StopAndWaitManager):
         packet_to_be_sent = Packet(0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8"))
         self._send_packet(packet_to_be_sent)
 
-    def receive_data(self):
-        data, _address = self.input_stream.receive()
+    def download_data(self):
+        self.input_stream.settimeout(self.TIMEOUT)
+        rcv_count = 0
+        while rcv_count < self.RETRIES + 1:
+            try:
+                data, _address = self.input_stream.receive()
+                break
+            except Exception as _e:
+
+                if rcv_count == self.RETRIES + 1:
+                    raise MaximumRetriesReachedError
+
         packet = Packet.from_bytes(data)
         self.logger.info(f"{packet}")
         # TODO validacion de errores del packete

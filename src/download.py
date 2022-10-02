@@ -18,7 +18,7 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
     payload = 1
     while payload:
         try:
-            payload = downloader.receive_data()
+            payload = downloader.download_data()
             logger.info(f"received payload from {server_address}")
             file.write(payload)
         except OldPacketReceivedError:

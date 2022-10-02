@@ -14,6 +14,7 @@ class ClientWorker(threading.Thread):
     READ_BUFFER = 1024
 
     def __init__(self, blocking_queue, client_address, file_name, logger, is_upload):
+        self.file = None
         self.packet_number = 0
         self.is_upload = is_upload
         self.address = client_address
@@ -42,7 +43,7 @@ class ClientWorker(threading.Thread):
         payload = 1
         while payload:
             try:
-                payload = self.protocol.receive_data()
+                payload = self.protocol.download_data()
                 self.logger.info(f"received payload from {self.address}")
                 self.file.write(payload)
             except OldPacketReceivedError:
