@@ -26,10 +26,6 @@ class StopAndWaitManager:
         self.logger = logger
         self.packet_number = 0
 
-    def start_download_connection(self, filename):
-        packet_to_be_sent = Packet(0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8"))
-        self._send_packet(packet_to_be_sent)
-
     def finish_connection(self, filename):
         packet_to_be_sent = Packet(
             0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
@@ -97,6 +93,10 @@ class StopAndWaitUploaderManager(StopAndWaitManager):
 class StopAndWaitDownloaderManager(StopAndWaitManager):
     def __init__(self, output_socket, input_stream, server_address, logger):
         super().__init__(output_socket, input_stream, server_address, logger)
+
+    def start_download_connection(self, filename):
+        packet_to_be_sent = Packet(0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8"))
+        self._send_packet(packet_to_be_sent)
 
     def receive_data(self):
         data, _address = self.input_stream.receive()

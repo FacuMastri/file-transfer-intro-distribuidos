@@ -2,14 +2,14 @@ import logging
 import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_download_args
-from lib.stop_and_wait_manager import StopAndWaitManager, MaximumRetriesReachedError, OldPacketReceivedError
+from lib.stop_and_wait_manager import StopAndWaitDownloaderManager, MaximumRetriesReachedError, OldPacketReceivedError
 from logger import initialize_logger
 from lib.socket_wrapper import SocketWrapper
 
 def download_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
     logger.info(f"Downloading {filename} from FTP server to {filepath}")
     input_socket = SocketWrapper(socket)
-    stop_and_wait_manager = StopAndWaitManager(socket, input_socket, server_address, logger)
+    stop_and_wait_manager = StopAndWaitDownloaderManager(socket, input_socket, server_address, logger)
 
     stop_and_wait_manager.start_download_connection(filename)
     file = open(f"%s{filename}" % filepath, "wb")
