@@ -25,7 +25,6 @@ def download_file(socket: socket, filename: str, filepath: str, logger: logging.
     while payload:
         try:
             payload = stop_and_wait_manager.receive_data()
-            logger.info(f"Received payload from {server_address}")
             file.write(payload)
         except OldPacketReceivedError:
             logger.info("Old packet received, ignoring")
