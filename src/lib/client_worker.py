@@ -2,7 +2,11 @@ import os
 import threading
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.blocking_queue import BlockingQueue
-from lib.stop_and_wait_manager import StopAndWaitDownloaderManager, StopAndWaitUploaderManager, OldPacketReceivedError
+from lib.stop_and_wait_manager import (
+    StopAndWaitDownloaderManager,
+    StopAndWaitUploaderManager,
+    OldPacketReceivedError,
+)
 from upload import READ_BUFFER
 
 BUCKET_DIRECTORY = "src/server/files/"
@@ -22,8 +26,15 @@ class ClientWorker(threading.Thread):
         self.blocking_queue = blocking_queue
         output_socket = socket(AF_INET, SOCK_DGRAM)
         input_stream = BlockingQueue(blocking_queue)
-        self.protocol = StopAndWaitDownloaderManager(output_socket, input_stream, client_address, logger) \
-            if is_upload else StopAndWaitUploaderManager(output_socket, input_stream, client_address, logger)
+        self.protocol = (
+            StopAndWaitDownloaderManager(
+                output_socket, input_stream, client_address, logger
+            )
+            if is_upload
+            else StopAndWaitUploaderManager(
+                output_socket, input_stream, client_address, logger
+            )
+        )
         threading.Thread.__init__(self)
 
     def run(self):
@@ -35,7 +46,6 @@ class ClientWorker(threading.Thread):
             self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "rb")
             self.protocol.send_ack(0)
             self.upload_file()
-
 
     def download_file(self):
         payload = 1

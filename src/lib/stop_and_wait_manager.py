@@ -21,9 +21,8 @@ class StopAndWaitManager:
         self.packet_number = 0
 
     def finish_connection(self, filename):
-        packet_to_be_sent = Packet(
-            0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8")
-        )  # sending filesize as payload
+        # Sending filesize as payload
+        packet_to_be_sent = Packet(0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8"))
         self.packet_number = 0
         self._send_packet(packet_to_be_sent)
 
@@ -45,7 +44,9 @@ class StopAndWaitManager:
         raise MaximumRetriesReachedError
 
     def send_ack(self, packet_number):
-        self.logger.debug(f"Sending ACK number {packet_number} to {self.server_address}")
+        self.logger.debug(
+            f"Sending ACK number {packet_number} to {self.server_address}"
+        )
         self.output_socket.sendto(
             Packet.ack_packet(packet_number).to_bytes(), self.server_address
         )
@@ -57,7 +58,7 @@ class StopAndWaitManager:
 
         if packet.packet_number != self.packet_number:
             self.logger.debug(
-                f"Packet number doesnt match: recv:{packet.packet_number}, own:{self.packet_number}"
+                f"Packet number does not match: recv:{packet.packet_number}, own:{self.packet_number}"
             )
             self.receive_ack()
 
@@ -71,9 +72,10 @@ class StopAndWaitUploaderManager(StopAndWaitManager):
         super().__init__(output_socket, input_stream, server_address, logger)
 
     def start_upload_connection(self, filename, filesize: int):
+        # Sending filesize as payload
         packet_to_be_sent = Packet(
             0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8")
-        )  # sending filesize as payload
+        )
         self._send_packet(packet_to_be_sent)
 
     def upload_data(self, data, filename):
@@ -111,7 +113,7 @@ class StopAndWaitDownloaderManager(StopAndWaitManager):
         # TODO ver si se puede mejorar el return este ^ ver que devolver en el caso de que termino
         if packet.packet_number != self.packet_number:
             self.logger.debug(
-                f"Packet number doesnt match: recv: {packet.packet_number}, own: {self.packet_number}"
+                f"Packet number does not match: recv: {packet.packet_number}, own: {self.packet_number}"
             )
             self.send_ack(self.packet_number - 1)
             raise OldPacketReceivedError

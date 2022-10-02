@@ -3,7 +3,10 @@ import os
 from socket import AF_INET, SOCK_DGRAM, socket
 from lib.parser import parse_upload_args
 from lib.socket_wrapper import SocketWrapper
-from lib.stop_and_wait_manager import StopAndWaitUploaderManager, MaximumRetriesReachedError
+from lib.stop_and_wait_manager import (
+    StopAndWaitUploaderManager,
+    MaximumRetriesReachedError,
+)
 from logger import initialize_logger
 
 READ_BUFFER = 1024
@@ -24,7 +27,7 @@ def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Lo
     filesize = os.stat(filepath)
     logger.info(f"filesize {filesize.st_size}")
     uploader.start_upload_connection(filename, filesize.st_size)
-    logger.info("connection established")
+    logger.info("Connection established")
     with open(filepath, "rb") as file:
         data = file.read(READ_BUFFER)
         while data:
