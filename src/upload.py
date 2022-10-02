@@ -8,10 +8,9 @@ from lib.stop_and_wait_manager import (
     MaximumRetriesReachedError,
 )
 from lib.logger import initialize_logger
-from lib.constants import SAW_PROTOCOL
+from lib.constants import SAW_PROTOCOL, READ_BUFFER
 from lib.go_back_n_manager import GoBackNManager
 
-READ_BUFFER = 1024
 # Green
 COLOR_UPLOAD = "\033[0;32m"
 END_COLOR = "\033[0m"

@@ -1,3 +1,4 @@
+from lib.constants import RETRIES
 from lib.exceptions import (
     MaximumRetriesReachedError,
     AckNotReceivedError,
@@ -19,8 +20,8 @@ class StopAndWaitUploaderManager(ProtocolManager):
         self._send_packet(packet_to_be_sent)
 
     def upload_data(self, data, filename):
-        packet_to_be_sent = Packet(self.packet_number, 1, 0, 0, 0, 0, 0, filename, data)
-        self._send_packet(packet_to_be_sent)
+        packet = Packet(self.packet_number, 1, 0, 0, 0, 0, 0, filename, data)
+        self._send_packet(packet)
         self.packet_number += 1
 
 
@@ -34,14 +35,14 @@ class StopAndWaitDownloaderManager(ProtocolManager):
 
     def download_data(self):
         rcv_count = 0
-        while rcv_count < self.RETRIES + 1:
+        while rcv_count < RETRIES + 1:
             try:
                 data, _address = self.input_stream.receive()
                 break
             except Exception as _e:
                 self.logger.error("Timeout event occurred on recv")
                 rcv_count += 1
-                if rcv_count == self.RETRIES + 1:
+                if rcv_count == RETRIES + 1:
                     raise MaximumRetriesReachedError
 
         packet = Packet.from_bytes(data)

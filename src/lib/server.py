@@ -3,12 +3,10 @@ import queue
 from socket import AF_INET, SOCK_DGRAM, socket
 
 from lib.client_worker import ClientWorker
+from lib.constants import BUFFER_RECV_SOCKET
 from lib.packet import Packet
 
 BUCKET_DIRECTORY = "src/server/files/"
-
-SOCKET_BUFFER = 4096
-SERVER_TIMEOUT = 10
 
 
 class Server:
@@ -24,7 +22,7 @@ class Server:
         self.logger.info(f"FTP server up in port {(self.host, self.port)}")
         workers = {}
         while True:
-            data, client_address = server_socket.recvfrom(SOCKET_BUFFER)
+            data, client_address = server_socket.recvfrom(BUFFER_RECV_SOCKET)
             self.logger.info(f"Received message from {client_address}")
             packet = Packet.from_bytes(data)
             if packet.is_syn():

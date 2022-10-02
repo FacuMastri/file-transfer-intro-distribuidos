@@ -7,17 +7,13 @@ from lib.stop_and_wait_manager import (
     StopAndWaitUploaderManager,
     OldPacketReceivedError,
 )
-from lib.constants import SAW_PROTOCOL
+from lib.constants import SAW_PROTOCOL, READ_BUFFER
 from lib.go_back_n_manager import GoBackNManager
-from upload import READ_BUFFER
 
 BUCKET_DIRECTORY = "src/server/files/"
 
 
 class ClientWorker(threading.Thread):
-    TIMEOUT = 3
-    READ_BUFFER = 1024
-
     def __init__(
         self, blocking_queue, client_address, file_name, logger, is_upload, protocol
     ):

@@ -1,5 +1,6 @@
 import logging
 
+from lib.logger import initialize_logger
 from lib.parser import parse_server_args
 from lib.server import Server
 

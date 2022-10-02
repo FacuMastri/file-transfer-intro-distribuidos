@@ -1,20 +1,13 @@
-from lib.exceptions import (
-    MaximumRetriesReachedError,
-    AckNotReceivedError,
-    OldPacketReceivedError,
-)
+from lib.constants import TIMEOUT, RETRIES
+from lib.exceptions import MaximumRetriesReachedError
 from lib.packet import Packet
 
 
 class ProtocolManager:
-    TIMEOUT = 2
-    RETRIES = 5
-    SOCKET_BUFFER = 1024
-
     def __init__(self, output_socket, input_stream, server_address, logger):
         self.output_socket = output_socket
         self.input_stream = input_stream
-        self.output_socket.settimeout(self.TIMEOUT)
+        self.output_socket.settimeout(TIMEOUT)
         # entidad de entrada que encapsula a la cola bloqueante y al socket. si es un socker hace recv, si es una cola hace get(true, timeout)
         self.server_address = server_address
         self.logger = logger
@@ -32,7 +25,7 @@ class ProtocolManager:
     def _send_packet(self, packet):
         self.logger.debug(f"Preparing {packet.size()} bytes to {self.server_address}")
         send_count = 0
-        while send_count < self.RETRIES:
+        while send_count < RETRIES:
             try:
                 self.output_socket.sendto(packet.to_bytes(), self.server_address)
                 self.logger.info(f"Packet sent with ({packet})")
@@ -56,7 +49,7 @@ class ProtocolManager:
 
     def _receive_ack(self):
         rcv_count = 0
-        while rcv_count < self.RETRIES + 1:
+        while rcv_count < RETRIES + 1:
             data, _address = self.input_stream.receive()
             packet = Packet.from_bytes(data)
             if packet.packet_number < self.packet_number:

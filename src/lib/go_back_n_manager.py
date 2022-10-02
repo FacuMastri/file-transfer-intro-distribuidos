@@ -1,5 +1,4 @@
-from socket import socket
-import queue
+from lib.constants import RETRIES
 from lib.exceptions import (
     AckNotReceivedError,
     MaximumRetriesReachedError,
@@ -23,10 +22,12 @@ class GoBackNManager(ProtocolManager):
 
     def start_upload_connection(self, filename, filesize: int):
         # Sending filesize as payload
-        packet_to_be_sent = Packet(
-            0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8")
-        )
-        self._send_packet(packet_to_be_sent)
+        packet = Packet(0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8"))
+        self._send_packet(packet)
+
+    def start_download_connection(self, filename):
+        packet = Packet(0, 0, 0, 0, 1, 0, 0, filename, bytes("", "utf-8"))
+        super()._send_packet(packet)
 
     def finish_connection(self, filename):
         while self._wait_for_ack():
@@ -54,7 +55,6 @@ class GoBackNManager(ProtocolManager):
             self.in_flight.append(packet)
             return
 
-        # Receive ACKs, tal vez sin la necesidad de bloquear?
         try:
             self._wait_for_ack()
         except AckNotReceivedError:
@@ -65,6 +65,7 @@ class GoBackNManager(ProtocolManager):
         self.in_flight.append(packet)
 
     def _process_ack(self, ack_packet):
+        self.logger.debug(f"Processing ACK {ack_packet.packet_number}")
         packet_received = ack_packet.packet_number - self.in_flight[0].packet_number
         if packet_received == 0:
             self.in_flight.pop(0)
@@ -74,7 +75,7 @@ class GoBackNManager(ProtocolManager):
 
     def _wait_for_ack(self):
         retries = 0
-        while retries != self.RETRIES:
+        while retries != RETRIES:
             try:
                 ack_packet = self._receive_ack()
                 self._process_ack(ack_packet)
@@ -97,17 +98,17 @@ class GoBackNManager(ProtocolManager):
 
     def download_data(self):
         rcv_count = 0
-        while rcv_count < self.RETRIES + 1:
+        while rcv_count < RETRIES + 1:
             try:
                 data, _address = self.input_stream.receive()
                 break
             except Exception as _e:
                 self.logger.error("Timeout event occurred on recv")
-                if rcv_count == self.RETRIES + 1:
+                if rcv_count == RETRIES + 1:
                     raise MaximumRetriesReachedError
 
         packet = Packet.from_bytes(data)
-        self.logger.info(f"Received packet with {packet}")
+        self.logger.info(f"Received packet as {packet}")
         # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(f"Comunication with {self.server_address} finished.")
