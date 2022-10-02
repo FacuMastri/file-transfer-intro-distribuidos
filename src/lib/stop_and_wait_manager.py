@@ -24,7 +24,10 @@ class StopAndWaitManager:
         # Sending filesize as payload
         packet_to_be_sent = Packet(0, 1, 1, 0, 0, 0, 0, filename, bytes("", "utf-8"))
         self.packet_number = 0
-        self._send_packet(packet_to_be_sent)
+        try:
+            self._send_packet(packet_to_be_sent)
+        except Exception as _e:
+            self.logger.info("Last ACK was lost, assuming connection finished.")
 
     def _send_packet(self, packet):
         self.logger.debug(f"Preparing {packet.size()} bytes to {self.server_address}")
