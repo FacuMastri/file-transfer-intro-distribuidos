@@ -1,3 +1,6 @@
+import queue
+import socket
+
 from lib.constants import RETRIES
 from lib.exceptions import (
     AckNotReceivedError,
@@ -55,11 +58,7 @@ class GoBackNManager(ProtocolManager):
             self.in_flight.append(packet)
             return
 
-        try:
-            self._wait_for_ack()
-        except AckNotReceivedError:
-            # Manejar error
-            pass
+        self._wait_for_ack()
 
         self._send_packet(packet)
         self.in_flight.append(packet)
@@ -67,8 +66,10 @@ class GoBackNManager(ProtocolManager):
     def _process_ack(self, ack_packet):
         self.logger.debug(f"Processing ACK {ack_packet.packet_number}")
         packet_received = ack_packet.packet_number - self.in_flight[0].packet_number
+        # Fix para el ultimo paquete de desconexion
         if packet_received == 0:
             self.in_flight.pop(0)
+            return
         for i in range(packet_received):
             self.in_flight.pop(0)
         self.packet_number = self.in_flight[0].packet_number
@@ -83,8 +84,7 @@ class GoBackNManager(ProtocolManager):
                     self.logger.info("Window is empty, returning")
                     return False
                 return True
-            except Exception as _e:
-                # TODO ver lo de las excepciones de los objetos
+            except (socket.timeout, queue.Empty) as _e:
                 # Si la lista está vacia, no hay nada que reenviar
                 if not self.in_flight:
                     self.logger.info("Window is empty, returning")
