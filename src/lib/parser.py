@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from lib.constants import DEFAULT_SERVER_PORT, DEFAULT_SERVER_ADDRESS
+from lib.constants import DEFAULT_SERVER_PORT, DEFAULT_SERVER_ADDRESS, DEFAULT_PROTOCOL
 
 
 def make_parser(description):
@@ -15,10 +15,11 @@ def make_parser(description):
     )
     parser.add_argument("-H", "--host", metavar="addr", help="server ip address")
     parser.add_argument("-p", "--port", metavar="port", help="server port")
+    parser.add_argument("-P", "--prot", metavar="prot", help="server protocol")
 
     return parser
 
-
+# TODO sacar codigo repetido
 def parse_server_args():
     parser = make_parser("FTP server - flags for server command")
     parser.add_argument("-s", "--storage", metavar="dirpath", help="storage dir path")
@@ -49,6 +50,8 @@ def get_upload_args(args):
 
     args.host = DEFAULT_SERVER_ADDRESS if args.host is None else args.host
     args.port = DEFAULT_SERVER_PORT if args.port is None else args.port
+    args.prot = DEFAULT_PROTOCOL if args.prot is None else args.prot
+
     args.debug_level = debug_level
 
     return args
@@ -77,6 +80,8 @@ def get_download_args(args):
 
     args.host = DEFAULT_SERVER_ADDRESS if args.host is None else args.host
     args.port = DEFAULT_SERVER_PORT if args.port is None else args.port
+    args.prot = DEFAULT_PROTOCOL if args.prot is None else args.prot
+
     args.debug_level = debug_level
 
     return args
@@ -95,6 +100,8 @@ def get_server_args(args):
 
     args.port = DEFAULT_SERVER_PORT if args.port is None else args.port
     args.host = DEFAULT_SERVER_ADDRESS if args.host is None else args.host
+    args.prot = DEFAULT_PROTOCOL if args.prot is None else args.prot
+
     args.debug_level = debug_level
 
     return args

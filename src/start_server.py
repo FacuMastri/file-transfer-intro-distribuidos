@@ -19,4 +19,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
     server = Server(args.host, int(args.port), logger)
-    server.start()
+    try:
+        server.start(args.prot)
+    except:
+        logger.error("Unexpected exception caught, exiting...")

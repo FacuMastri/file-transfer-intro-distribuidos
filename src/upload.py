@@ -8,6 +8,8 @@ from lib.stop_and_wait_manager import (
     MaximumRetriesReachedError,
 )
 from lib.logger import initialize_logger
+from lib.constants import SAW_PROTOCOL
+from lib.go_back_n_manager import GoBackNManager
 
 READ_BUFFER = 1024
 # Green
@@ -15,14 +17,14 @@ COLOR_UPLOAD = "\033[0;32m"
 END_COLOR = "\033[0m"
 
 
-def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Logger):
+def upload_file(socket: socket, filename: str, filepath: str, logger: logging.Logger, protocol: str):
     if not os.path.isfile(filepath):
         logger.error(f"File {filepath} does not exist")
         return
 
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
     input_socket = SocketWrapper(socket)
-    uploader = StopAndWaitUploaderManager(socket, input_socket, server_address, logger)
+    uploader = StopAndWaitUploaderManager(socket, input_socket, server_address, logger) if protocol == SAW_PROTOCOL else GoBackNManager(socket, input_socket, server_address, logger)
 
     filesize = os.stat(filepath)
     logger.info(f"filesize {filesize.st_size}")
@@ -45,7 +47,7 @@ if __name__ == "__main__":
     logger = initialize_logger(args.debug_level, server_address, "upload")
 
     try:
-        upload_file(client_socket, args.name, args.src, logger)
+        upload_file(client_socket, args.name, args.src, logger, args.prot)
     except MaximumRetriesReachedError:
         logger.error("Maximum retries reached")
     finally:
