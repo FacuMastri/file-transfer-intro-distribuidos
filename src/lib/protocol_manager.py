@@ -1,3 +1,4 @@
+import queue
 import socket
 
 from lib.constants import TIMEOUT, RETRIES
@@ -32,7 +33,7 @@ class ProtocolManager:
                 self.logger.debug(f"Packet sent as ({packet})")
                 self._receive_ack()
                 return
-            except (MaximumRetriesReachedError, socket.timeout) as _e:
+            except (MaximumRetriesReachedError, socket.timeout, queue.Empty) as _e:
                 self.logger.error("Timeout event occurred on send. Retrying...")
                 send_count += 1
 

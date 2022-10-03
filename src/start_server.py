@@ -12,4 +12,4 @@ if __name__ == "__main__":
     try:
         server.start(args.prot, args.storage)
     except:
-        logger.error(f"Unexpected exception caught, exiting...")
+        logger.error("Unexpected exception caught, exiting...")
