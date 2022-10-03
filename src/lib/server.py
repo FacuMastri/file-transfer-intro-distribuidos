@@ -14,11 +14,15 @@ class Server:
         self.logger = logger
 
     def start(self, protocol, storage_path):
+
         if not os.path.exists("%s" % storage_path):
             os.makedirs(storage_path)
+
         server_socket = self._create_socket()
-        self.logger.info(f"FTP server up in port {(self.host, self.port)}")
+        self.logger.info(f"FTP server up in {(self.host, self.port)}")
+
         workers = {}
+
         while True:
             data, client_address = server_socket.recvfrom(BUFFER_RECV_SOCKET)
             self.logger.debug(f"Received message from {client_address}")

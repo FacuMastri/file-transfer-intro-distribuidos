@@ -54,5 +54,5 @@ if __name__ == "__main__":
     except MaximumRetriesReachedError:
         logger.error("Maximum retries reached")
     finally:
-        logger.info("Closing socket")
+        logger.debug("Closing socket")
         client_socket.close()

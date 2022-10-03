@@ -52,6 +52,7 @@ class GoBackNManager(ProtocolManager):
             packet_number = self.in_flight[-1].packet_number + 1
         self.logger.debug(f"Packet number to be sent: {packet_number}")
         packet = Packet(packet_number, 1, 0, 0, 0, 0, 0, filename, data)
+        self.logger.debug(f"In flight len: {len(self.in_flight)}")
         if len(self.in_flight) < self.WINDOW_SIZE:
             self._send_packet(packet)
             self.in_flight.append(packet)
@@ -63,7 +64,6 @@ class GoBackNManager(ProtocolManager):
         self.in_flight.append(packet)
 
     def _process_ack(self, ack_packet):
-        self.logger.debug(f"Processing ACK {ack_packet.packet_number}")
         packet_received = ack_packet.packet_number - self.in_flight[0].packet_number
         # Fix para el ultimo paquete de desconexion
         if packet_received == 0:
@@ -89,7 +89,7 @@ class GoBackNManager(ProtocolManager):
                     self.logger.debug("Window is empty, returning")
                     return False
                 self.logger.debug(
-                    f"Timeout. Resending packets from {self.in_flight[0].packet_number}"
+                    f"Timeout. Resending packets from packet number {self.in_flight[0].packet_number}"
                 )
                 retries += 1
                 for packet in self.in_flight:
