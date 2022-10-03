@@ -44,33 +44,36 @@ class GoBackNManager(ProtocolManager):
             self.logger.info("Last ACK was lost, assuming connection finished.")
 
     def upload_data(self, data, filename):
-        # Si hay lugar en la window, mandar el paquete
+
         packet_number = 0
-        if not self.in_flight:
-            packet_number = 0
-        else:
+        if self.in_flight:
             packet_number = self.in_flight[-1].packet_number + 1
-        self.logger.debug(f"Packet number to be sent: {packet_number}")
+
         packet = Packet(packet_number, 1, 0, 0, 0, 0, 0, filename, data)
         self.logger.debug(f"In flight len: {len(self.in_flight)}")
+
+        # Si hay lugar en la window, mandar el paquete
         if len(self.in_flight) < self.WINDOW_SIZE:
             self._send_packet(packet)
             self.in_flight.append(packet)
             return
 
+        # Esperamos que llegue un ACK para liberar espacio en la window y enviamos el paquete
         self._wait_for_ack()
-
         self._send_packet(packet)
         self.in_flight.append(packet)
 
     def _process_ack(self, ack_packet):
+        # Esto puede dar negativo -> entonces no popea la lista nunca y ahi la in flight crece de tamaño
+        # mas alla del window size
         packet_received = ack_packet.packet_number - self.in_flight[0].packet_number
         # Fix para el ultimo paquete de desconexion
         if packet_received == 0:
             self.in_flight.pop(0)
-            return
         for i in range(packet_received):
             self.in_flight.pop(0)
+        # Esto en la ultima iteracion explota, por eso el try/catch en el _wait_for_ack
+        # con el IndexError
         self.packet_number = self.in_flight[0].packet_number
 
     def _wait_for_ack(self):
@@ -83,7 +86,7 @@ class GoBackNManager(ProtocolManager):
                     self.logger.debug("Window is empty, returning")
                     return False
                 return True
-            except (socket.timeout, queue.Empty) as _e:
+            except (socket.timeout, queue.Empty, IndexError) as _e:
                 # Si la lista está vacia, no hay nada que reenviar
                 if not self.in_flight:
                     self.logger.debug("Window is empty, returning")
