@@ -4,7 +4,7 @@
 
 First start the server
 
-     python3 src/start_server.py -v -H 127.0.0.1 -p 12000 -P {saw, gbn}
+     python3 src/start_server.py -v -H 127.0.0.1 -p 12000 -P {saw, gbn} --storage src/server/files/
 
 Open a new terminal and upload a file
 

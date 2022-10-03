@@ -10,6 +10,6 @@ if __name__ == "__main__":
     server = Server(args.host, int(args.port), logger)
 
     try:
-        server.start(args.prot)
-    except:
-        logger.error("Unexpected exception caught, exiting...")
+        server.start(args.prot, args.storage)
+    except Exception as e:
+        logger.error(f"Unexpected exception caught: {e}, exiting...")

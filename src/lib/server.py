@@ -6,8 +6,6 @@ from lib.client_worker import ClientWorker
 from lib.constants import BUFFER_RECV_SOCKET
 from lib.packet import Packet
 
-BUCKET_DIRECTORY = "src/server/files/"
-
 
 class Server:
     def __init__(self, host: str, port: int, logger):
@@ -15,9 +13,9 @@ class Server:
         self.port = port
         self.logger = logger
 
-    def start(self, protocol):
-        if not os.path.exists("%s" % BUCKET_DIRECTORY):
-            os.makedirs(BUCKET_DIRECTORY)
+    def start(self, protocol, storage_path):
+        if not os.path.exists("%s" % storage_path):
+            os.makedirs(storage_path)
         server_socket = self._create_socket()
         self.logger.info(f"FTP server up in port {(self.host, self.port)}")
         workers = {}
@@ -34,6 +32,7 @@ class Server:
                     self.logger,
                     packet.is_upload,
                     protocol,
+                    storage_path,
                 )
                 workers[client_address] = worker
                 workers[client_address].start()

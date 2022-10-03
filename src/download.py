@@ -15,9 +15,9 @@ from lib.socket_wrapper import SocketWrapper
 
 
 def download_file(
-    socket: socket, filename: str, filepath: str, logger: logging.Logger, protocol: str
+    socket: socket, file_name: str, file_path: str, logger: logging.Logger, protocol: str
 ):
-    logger.info(f"Downloading {filename} from FTP server to {filepath} + {filename}")
+    logger.info(f"Downloading {file_name} from FTP server to {file_path} + {file_name}")
     input_socket = SocketWrapper(socket)
     downloader = (
         StopAndWaitDownloaderManager(socket, input_socket, server_address, logger)
@@ -26,8 +26,8 @@ def download_file(
     )
 
     logger.info("FTP client up")
-    downloader.start_download_connection(filename)
-    file = open(f"%s{filename}" % filepath, "wb")
+    downloader.start_download_connection(file_name)
+    file = open(f"%s{file_name}" % file_path, "wb")
     logger.info("Connection established")
 
     payload = 1
@@ -38,13 +38,12 @@ def download_file(
         except OldPacketReceivedError:
             logger.info("Old packet received, ignoring")
         except MaximumRetriesReachedError as e:
-            logger.debug(e)
             file.close()
-            os.remove(file.name)
+            os.remove(file_path + file_name)
             logger.info(f"Exception occurred: {e}, incomplete file removed")
             exit(-1)
     file.close()
-    logger.info(f"Download completed for file: {filename}!")
+    logger.info(f"Download completed for file: {file_name}! It was saved to {file_path + file_name}")
 
 
 if __name__ == "__main__":

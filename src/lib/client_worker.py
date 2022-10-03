@@ -11,12 +11,17 @@ from lib.stop_and_wait_manager import (
 from lib.constants import SAW_PROTOCOL, READ_BUFFER
 from lib.go_back_n_manager import GoBackNManager
 
-BUCKET_DIRECTORY = "src/server/files/"
-
 
 class ClientWorker(threading.Thread):
     def __init__(
-        self, blocking_queue, client_address, file_name, logger, is_upload, protocol
+        self,
+        blocking_queue,
+        client_address,
+        file_name,
+        logger,
+        is_upload,
+        protocol,
+        storage_path,
     ):
         self.file = None
         self.packet_number = 0
@@ -25,6 +30,7 @@ class ClientWorker(threading.Thread):
         self.logger = logger
         self.file_name = file_name
         self.blocking_queue = blocking_queue
+        self.storage_path = storage_path
         output_socket = socket(AF_INET, SOCK_DGRAM)
         input_stream = BlockingQueue(blocking_queue)
         self.protocol = self._select_protocol(
@@ -35,11 +41,11 @@ class ClientWorker(threading.Thread):
     def run(self):
         try:
             if self.is_upload:
-                self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "wb")
+                self.file = open(f"%s{self.file_name}" % self.storage_path, "wb")
                 self.protocol.send_ack(0)
                 self.download_file()
             else:
-                self.file = open(f"%s{self.file_name}" % BUCKET_DIRECTORY, "rb")
+                self.file = open(f"%s{self.file_name}" % self.storage_path, "rb")
                 self.protocol.send_ack(0)
                 self.upload_file()
         except:
@@ -55,7 +61,7 @@ class ClientWorker(threading.Thread):
                 self.logger.info("Old packet received")
             except MaximumRetriesReachedError as e:
                 self.file.close()
-                os.remove(self.file_name)  # TODO recibir ruta completa
+                os.remove(self.storage_path + self.file_name)
                 self.logger.info(f"Exception occurred: {e}, incomplete file removed")
 
         self.logger.info("Upload complete!")
