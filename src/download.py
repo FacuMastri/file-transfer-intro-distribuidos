@@ -21,7 +21,7 @@ def download_file(
     logger: logging.Logger,
     protocol: str,
 ):
-    logger.info(f"Downloading {file_name} from FTP server to {file_path} + {file_name}")
+    logger.info(f"Downloading {file_name} from FTP server to {file_path + file_name}")
     input_socket = SocketWrapper(socket)
     downloader = (
         StopAndWaitDownloaderManager(socket, input_socket, server_address, logger)
