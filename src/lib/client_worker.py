@@ -63,6 +63,7 @@ class ClientWorker(threading.Thread):
                 self.file.close()
                 os.remove(self.storage_path + self.file_name)
                 self.logger.info(f"Exception occurred: {e}, incomplete file removed")
+                return
 
         self.logger.info("Upload complete!")
         self.file.close()
@@ -98,3 +99,6 @@ class ClientWorker(threading.Thread):
                 return GoBackNManager(
                     output_socket, input_stream, self.address, self.logger
                 )
+                
+    def is_alive(self):
+        return super().is_alive()

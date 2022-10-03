@@ -70,11 +70,11 @@ def get_server_args(args):
 
 def parse_common_args(args):
     if args.quiet:
-        debug_level = logging.ERROR
+        debug_level = logging.INFO
     elif args.verbose:
         debug_level = logging.DEBUG
     else:
-        debug_level = logging.INFO
+        debug_level = logging.ERROR
     args.host = DEFAULT_SERVER_ADDRESS if args.host is None else args.host
     args.port = DEFAULT_SERVER_PORT if args.port is None else args.port
     args.prot = DEFAULT_PROTOCOL if args.prot is None else args.prot

@@ -22,7 +22,7 @@ class ProtocolManager:
         try:
             self._send_packet(packet_to_be_sent)
         except MaximumRetriesReachedError as _e:
-            self.logger.info("Last ACK was lost, assuming connection finished.")
+            self.logger.debug("Last ACK was lost, assuming connection finished.")
 
     def _send_packet(self, packet):
         self.logger.debug(f"Preparing {packet.size()} bytes to {self.server_address}")
@@ -33,11 +33,9 @@ class ProtocolManager:
                 self.logger.debug(f"Packet sent as ({packet})")
                 self._receive_ack()
                 return
-            except (MaximumRetriesReachedError, socket.timeout, queue.Empty) as _e:
-                self.logger.error("Timeout event occurred on send. Retrying...")
+            except (socket.timeout, queue.Empty) as _e:
+                self.logger.debug("Timeout event occurred on send. Retrying...")
                 send_count += 1
-
-        self.logger.error(f"Timeout limit reached. Retried {send_count} times. Exiting")
 
         raise MaximumRetriesReachedError
 

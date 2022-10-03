@@ -4,15 +4,15 @@
 
 First start the server
 
-     python3 src/start_server.py -v -H 127.0.0.1 -p 12000 -P {saw, gbn} --storage src/server/files/
+     python3 src/start_server.py -v -H 127.0.0.1 -p 2000 -P {saw, gbn} --storage src/server/files/
 
 Open a new terminal and upload a file
 
-     python3 src/upload.py -v -H 127.0.0.1 -p 12000 -P {saw, gbn} --src src/donald.jpeg --name donald.jpeg
+     python3 src/upload.py -v -H 127.0.0.1 -p 2000 -P {saw, gbn} --src src/donald.jpeg --name donald.jpeg
 
 Open a new terminal and download a file
 
-     python3 src/download.py -v -H 127.0.0.1 -p 12000 -P {saw, gbn} --dst src/client/files/ --name donald.jpeg
+     python3 src/download.py -v -H 127.0.0.1 -p 2000 -P {saw, gbn} --dst src/client/files/ --name donald.jpeg
 
 
 ## Test with packet loss

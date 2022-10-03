@@ -6,7 +6,7 @@ class Packet:
     1 bit si es upload o download
     1 bit de terminado
     1 bit esto es un ACK
-    2 bit de codigo de error:  00 - nombre repetido, 01 - todo ok, 10 - reservado uso futuro, 11 - reservado uso futuro
+    2 bit de codigo de error:  00 - todo ok, 01 - reservado uso futuro, 10 - reservado uso futuro, 11 - reservado uso futuro
     1 bit de SYN, tanto para inicio de conexion
     2 bit para version de protocolo
     1 byte para el largo del filename
@@ -71,7 +71,7 @@ class Packet:
             finished=False,
             ack=True,
             syn=False,
-            status_code=1,
+            status_code=0,
             version=0,
             filename="",
             payload=bytes(),

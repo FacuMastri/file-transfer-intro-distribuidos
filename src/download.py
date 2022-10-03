@@ -60,8 +60,8 @@ if __name__ == "__main__":
 
     try:
         download_file(client_socket, args.name, args.dst, logger, args.prot)
-    except MaximumRetriesReachedError:
-        logger.error("Maximum retries reached")
+    except:
+        logger.error("Unexpected exception caught, exiting...")
     finally:
         logger.debug("Closing socket")
         client_socket.close()

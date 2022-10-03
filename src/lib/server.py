@@ -28,7 +28,6 @@ class Server:
             self.logger.debug(f"Received message from {client_address}")
             packet = Packet.from_bytes(data)
             if packet.is_syn():
-                # TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba
                 worker = ClientWorker(
                     queue.Queue(),
                     client_address,
@@ -40,10 +39,14 @@ class Server:
                 )
                 workers[client_address] = worker
                 workers[client_address].start()
-                self.logger.info(f"Created new worker with filename {packet.filename}")
+                self.logger.info(f"Created new worker with key {client_address} and filename {packet.filename}")
+                for key in list(workers.keys()):
+                    if not workers.get(key).is_alive():
+                        self.logger.debug(f"deleted client thread {key}")
+                        del workers[key]
             else:
-                # TODO ver lo del get
                 workers[client_address].put((data, client_address))
+
 
     def _create_socket(self):
         server_socket = socket(AF_INET, SOCK_DGRAM)

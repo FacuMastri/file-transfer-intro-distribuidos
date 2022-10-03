@@ -41,7 +41,7 @@ class GoBackNManager(ProtocolManager):
         try:
             super()._send_packet(packet_to_be_sent)
         except MaximumRetriesReachedError:
-            self.logger.info("Last ACK was lost, assuming connection finished.")
+            self.logger.debug("Last ACK was lost, assuming connection finished.")
 
     def upload_data(self, data, filename):
 
@@ -97,6 +97,7 @@ class GoBackNManager(ProtocolManager):
                 retries += 1
                 for packet in self.in_flight:
                     self._send_packet(packet)
+        raise MaximumRetriesReachedError
 
     def download_data(self):
         rcv_count = 0
@@ -105,22 +106,24 @@ class GoBackNManager(ProtocolManager):
                 data, _address = self.input_stream.receive()
                 break
             except (socket.timeout, queue.Empty) as _e:
-                self.logger.error("Timeout event occurred on recv")
+                self.logger.debug("Timeout event occurred on recv")
+                rcv_count += 1
                 if rcv_count == RETRIES + 1:
                     raise MaximumRetriesReachedError
+            
 
         packet = Packet.from_bytes(data)
         self.logger.debug(f"Received packet as {packet}")
-        # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(f"Comunication with {self.server_address} finished.")
             self.send_ack(0)
             return packet.payload
-        # TODO ver si se puede mejorar el return este ^ ver que devolver en el caso de que termino
         if packet.packet_number != self.packet_number:
             self.logger.debug(
                 f"Packet number does not match: recv: {packet.packet_number}, own: {self.packet_number}"
             )
+            if self.packet_number == 0:
+                raise OldPacketReceivedError
             self.send_ack(self.packet_number - 1)
             raise OldPacketReceivedError
         else:

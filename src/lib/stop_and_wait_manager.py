@@ -41,7 +41,7 @@ class StopAndWaitDownloaderManager(ProtocolManager):
                 data, _address = self.input_stream.receive()
                 break
             except (socket.timeout, queue.Empty) as _e:
-                self.logger.error("Timeout event occurred on recv")
+                self.logger.debug("Timeout event occurred on recv")
                 receive_count += 1
                 if receive_count == RETRIES + 1:
                     raise MaximumRetriesReachedError
@@ -53,7 +53,6 @@ class StopAndWaitDownloaderManager(ProtocolManager):
             self.logger.debug(f"Comunication with {self.server_address} finished.")
             self.send_ack(0)
             return packet.payload
-        # TODO ver si se puede mejorar el return este ^ ver que devolver en el caso de que termino
         if packet.packet_number != self.packet_number:
             self.logger.debug(
                 f"Packet number does not match: recv: {packet.packet_number}, own: {self.packet_number}"
