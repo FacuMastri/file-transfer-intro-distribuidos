@@ -17,9 +17,7 @@ class StopAndWaitUploaderManager(ProtocolManager):
 
     def start_upload_connection(self, filename, filesize: int):
         # Sending filesize as payload
-        packet = Packet(
-            0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8")
-        )
+        packet = Packet(0, 1, 0, 0, 1, 0, 0, filename, bytes(str(filesize), "utf-8"))
         self._send_packet(packet)
 
     def upload_data(self, data, filename):

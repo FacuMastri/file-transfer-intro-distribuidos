@@ -25,6 +25,7 @@ def download_file(
         else GoBackNManager(socket, input_socket, server_address, logger)
     )
 
+    logger.info("FTP client up")
     downloader.start_download_connection(filename)
     file = open(f"%s{filename}" % filepath, "wb")
     logger.info("Connection established")

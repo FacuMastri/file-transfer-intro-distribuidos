@@ -11,10 +11,6 @@ from lib.logger import initialize_logger
 from lib.constants import SAW_PROTOCOL, READ_BUFFER
 from lib.go_back_n_manager import GoBackNManager
 
-# Green
-COLOR_UPLOAD = "\033[0;32m"
-END_COLOR = "\033[0m"
-
 
 def upload_file(
     socket: socket, filename: str, filepath: str, logger: logging.Logger, protocol: str
@@ -22,6 +18,8 @@ def upload_file(
     if not os.path.isfile(filepath):
         logger.error(f"File {filepath} does not exist")
         return
+
+    logger.info("FTP client up")
 
     logger.info(f"Uploading {filepath} to FTP server with name {filename}")
     input_socket = SocketWrapper(socket)
@@ -32,7 +30,7 @@ def upload_file(
     )
 
     filesize = os.stat(filepath)
-    logger.info(f"filesize {filesize.st_size}")
+    logger.info(f"Filesize to be sent: {filesize.st_size} bytes")
     uploader.start_upload_connection(filename, filesize.st_size)
     logger.info("Connection established")
     with open(filepath, "rb") as file:
