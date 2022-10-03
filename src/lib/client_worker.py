@@ -58,7 +58,7 @@ class ClientWorker(threading.Thread):
                 payload = self.protocol.download_data()
                 self.file.write(payload)
             except OldPacketReceivedError:
-                self.logger.info("Old packet received")
+                self.logger.debug("Old packet received, ignoring")
             except MaximumRetriesReachedError as e:
                 self.file.close()
                 os.remove(self.storage_path + self.file_name)

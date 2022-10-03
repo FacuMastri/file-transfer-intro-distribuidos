@@ -21,7 +21,7 @@ class Server:
         workers = {}
         while True:
             data, client_address = server_socket.recvfrom(BUFFER_RECV_SOCKET)
-            self.logger.info(f"Received message from {client_address}")
+            self.logger.debug(f"Received message from {client_address}")
             packet = Packet.from_bytes(data)
             if packet.is_syn():
                 # TODO verificar que hay suficiente espacio en disco para el archivo - validar con el barba

@@ -80,13 +80,13 @@ class GoBackNManager(ProtocolManager):
                 ack_packet = self._receive_ack()
                 self._process_ack(ack_packet)
                 if not self.in_flight:
-                    self.logger.info("Window is empty, returning")
+                    self.logger.debug("Window is empty, returning")
                     return False
                 return True
             except (socket.timeout, queue.Empty) as _e:
                 # Si la lista está vacia, no hay nada que reenviar
                 if not self.in_flight:
-                    self.logger.info("Window is empty, returning")
+                    self.logger.debug("Window is empty, returning")
                     return False
                 self.logger.debug(
                     f"Timeout. Resending packets from {self.in_flight[0].packet_number}"
@@ -107,7 +107,7 @@ class GoBackNManager(ProtocolManager):
                     raise MaximumRetriesReachedError
 
         packet = Packet.from_bytes(data)
-        self.logger.info(f"Received packet as {packet}")
+        self.logger.debug(f"Received packet as {packet}")
         # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(f"Comunication with {self.server_address} finished.")

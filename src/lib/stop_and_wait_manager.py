@@ -47,7 +47,7 @@ class StopAndWaitDownloaderManager(ProtocolManager):
                     raise MaximumRetriesReachedError
 
         packet = Packet.from_bytes(data)
-        self.logger.info(f"Received packet with {packet}")
+        self.logger.debug(f"Received packet as {packet}")
         # TODO validacion de errores del packete
         if packet.is_finished():
             self.logger.debug(f"Comunication with {self.server_address} finished.")

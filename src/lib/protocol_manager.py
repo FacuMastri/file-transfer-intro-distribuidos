@@ -29,7 +29,7 @@ class ProtocolManager:
         while send_count < RETRIES:
             try:
                 self.output_socket.sendto(packet.to_bytes(), self.server_address)
-                self.logger.info(f"Packet sent as ({packet})")
+                self.logger.debug(f"Packet sent as ({packet})")
                 self._receive_ack()
                 return
             except (MaximumRetriesReachedError, socket.timeout) as _e:
@@ -59,7 +59,7 @@ class ProtocolManager:
                 )
                 receive_count += 1
             else:
-                self.logger.info(
+                self.logger.debug(
                     f"ACK received: {packet.is_ack()} for packet {packet.packet_number}"
                 )
                 return packet
